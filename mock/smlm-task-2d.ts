@@ -4,6 +4,7 @@ const tasks = [
   {
     id: 1,
     task_name: "Task 1",
+    task_description: "Mapping the Distribution of Mitochondrial Proteins",
     create_time: new Date("2023-08-20T09:30:51.01"),
     update_time: new Date("2023-08-23T08:25:15.26"),
     owner_id: 1,
@@ -16,6 +17,7 @@ const tasks = [
   {
     id: 2,
     task_name: "Task 2",
+    task_description: "Synaptic Vesicle Proteins in Neurons",
     create_time: new Date("2023-07-15T11:45:23.17"),
     update_time: new Date("2023-09-03T07:57:09.35"),
     owner_id: 1,
@@ -28,6 +30,7 @@ const tasks = [
   {
     id: 3,
     task_name: "Task 3",
+    task_description: "Membrane Protein Clustering in Bacteria",
     create_time: new Date("2023-10-02T16:37:52.19"),
     update_time: new Date("2023-10-03T17:45:32.37"),
     owner_id: 1,
@@ -40,6 +43,7 @@ const tasks = [
   {
     id: 4,
     task_name: "Task 4",
+    task_description: "Mapping the Distribution of Mitochondrial Proteins",
     create_time: new Date("2023-06-15T08:52:01.03"),
     update_time: new Date("2023-08-31T21:05:50.23"),
     owner_id: 2,
@@ -55,9 +59,9 @@ export default {
   'GET /api/smlm-task-2d/getAllTasks': (req: Request, res: Response, u: string) => {
     res.json({data: tasks})
   },
-  'POST /api/smlm-task-2d/getUserTask': (req: Request, res: Response, u: string) => {
+  'POST /api/smlm-task-2d/getUserTasks': (req: Request, res: Response, u: string) => {
     const {owner_id} = req.body;
-    const userTask = tasks.filter(task => task.owner_id === owner_id);
-    res.send({data: userTask})
+    const userTasks = tasks.filter(task => task.owner_id === owner_id);
+    res.send({data: userTasks})
   },
 };

@@ -1,49 +1,56 @@
 import { PageContainer } from '@ant-design/pro-components';
-import { Alert, Card, Typography } from 'antd';
-import React from 'react';
+import { Alert, Card, Typography, Avatar, Row, Col, Progress } from 'antd';
+import React, { useState, useEffect} from 'react';
 import { FormattedMessage, useIntl } from 'umi';
+import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
+import { getUserTasks } from '@/services/api/smlm-task';
 import styles from './Task.less';
+import { divide } from 'lodash';
 
-const CodePreview: React.FC = ({ children }) => (
-  <pre className={styles.pre}>
-    <code>
-      <Typography.Text copyable>{children}</Typography.Text>
-    </code>
-  </pre>
-);
+const { Meta } = Card;
 
-const Welcome: React.FC = () => {
-  const intl = useIntl();
+const Task: React.FC = () => {
+  const [tasks, setTasks] = useState<API.TaskItem[]>([]);
 
-  return (
-    <PageContainer>
-      <Card>
-        <Alert
-          message={intl.formatMessage({
-            id: 'pages.welcome.alertMessage',
-            defaultMessage: 'Faster and stronger heavy-duty components have been released.',
-          })}
-          type="success"
-          showIcon
-          banner
-          style={{
-            margin: -12,
-            marginBottom: 24,
-          }}
-        />
-        <Typography.Text strong>
-          <a
-            href="https://procomponents.ant.design/components/table"
-            rel="noopener noreferrer"
-            target="__blank"
-          >
-            <FormattedMessage id="pages.welcome.link" defaultMessage="Welcome" />
-          </a>
-        </Typography.Text>
-        <CodePreview>yarn add @ant-design/pro-components</CodePreview>
-      </Card>
-    </PageContainer>
-  );
+  const current_user_id = 1;
+
+  const getTasks = async () => {
+    const response = await getUserTasks({owner_id: current_user_id});
+    const userTasks = response.data;
+    setTasks(userTasks);
+  }
+
+
+  useEffect(() => {
+    getTasks();
+  }, []);
+
+  return <Row gutter={16}>
+    {tasks.map((task, index) => (
+      <Col span={5}>
+        <Card
+          style={{ width: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          cover={
+            <Progress style={{marginTop: '20px'}} type="circle" percent={Math.round(task.current_cycle / task.total_cycles * 100)} />
+          }
+          actions={[
+            <SettingOutlined key="setting" />,
+            <EditOutlined key="edit" />,
+            <EllipsisOutlined key="ellipsis" />,
+          ]}
+        >
+          
+          <Meta
+            style={{ width: 250, textAlign: 'center' }}
+            // avatar={<Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel" />}
+            title={task.task_name}
+            description={task.task_description}
+          />
+        </Card>;
+      </Col>
+    ))}
+  </Row>
 };
 
-export default Welcome;
+
+export default Task;
