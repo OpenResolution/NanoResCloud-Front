@@ -38,12 +38,12 @@
     component: './File',
   },
   {
-    path: '/v1',
+    path: '/auth',
     layout: false,
     routes: [
       {
         name: 'auth',
-        path: '/v1/verify',
+        path: '/auth/verify',
         component: './auth/verify',
       },
       {

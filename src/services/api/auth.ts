@@ -14,7 +14,7 @@ export async function authVerify(
     },
     options?: { [key: string]: any },
   ) {
-    return request('/v1/verify', {
+    return request('/v1/user/verify', {
       method: 'GET',
       params: {
         ...params,
