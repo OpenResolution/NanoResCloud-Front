@@ -38,6 +38,20 @@
     component: './File',
   },
   {
+    path: '/v1',
+    layout: false,
+    routes: [
+      {
+        name: 'auth',
+        path: '/v1/verify',
+        component: './auth/verify',
+      },
+      {
+        component: './404',
+      },
+    ],
+  },
+  {
     path: '/',
     redirect: '/task',
   },
