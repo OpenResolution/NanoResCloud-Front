@@ -73,4 +73,5 @@ export default defineConfig({
   mfsu: {},
   webpack5: {},
   exportStatic: {},
+  favicon: '/public/favicon.ico',
 });

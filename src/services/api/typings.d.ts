@@ -2,8 +2,8 @@
 /* eslint-disable */
 
 declare namespace API {
-  type TaskType = "2D" | "3D_single_plane" | "3D_bi_plane";
-  type TaskStatus = "success" | "processing" | "failed";
+  type TaskType = '2D' | '3D_single_plane' | '3D_bi_plane';
+  type TaskStatus = 'waiting' | 'processing' | 'success' | 'failed';
 
   type TaskItem = {
     id: number;
@@ -19,17 +19,15 @@ declare namespace API {
     total_cycles: number;
     current_cycle: number;
     task_status: TaskStatus;
-  }
+  };
 
   type GetUserTasksParams = {
     user_id: number;
-  }
+  };
 
   type GetUserTasksResult = {
     data: TaskItem[];
-  }
-
-
+  };
 
   /* template defined type */
   type CurrentUser = {
