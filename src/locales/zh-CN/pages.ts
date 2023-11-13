@@ -62,4 +62,6 @@ export default {
   'pages.searchTable.tenThousand': '万',
   'pages.searchTable.batchDeletion': '批量删除',
   'pages.searchTable.batchApproval': '批量审批',
+  'pages.returnToHome': '返回主页',
+  'pages.404.subTitle': '很抱歉，您要访问的页面不存在。',
 };
