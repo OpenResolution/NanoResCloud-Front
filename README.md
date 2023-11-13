@@ -4,6 +4,18 @@ This project is initialized with [Ant Design Pro](https://pro.ant.design). Follo
 
 ## Environment Prepare
 
+Install required node version:
+
+```bash
+nvm install
+```
+
+Use required node version (each time computer restarts):
+
+```bash
+nvm use
+```
+
 Install `node_modules`:
 
 ```bash
