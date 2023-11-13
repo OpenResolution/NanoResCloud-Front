@@ -35,7 +35,7 @@
     path: '/account',
     name: 'Account',
     icon: 'user',
-    component: './File',
+    component: './Account',
   },
   {
     path: '/auth',
