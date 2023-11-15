@@ -1,49 +1,331 @@
-import { PageContainer } from '@ant-design/pro-components';
-import { Alert, Card, Typography } from 'antd';
-import React from 'react';
+import { addRule, removeRule, rule, updateRule } from '@/services/api/api';
+import { getUserConfigs } from '@/services/api/config';
+import { PlusOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
+import {
+  FooterToolbar,
+  ModalForm,
+  PageContainer,
+  ProDescriptions,
+  ProFormText,
+  ProFormTextArea,
+  ProTable,
+} from '@ant-design/pro-components';
+import { Button, Drawer, Input, message } from 'antd';
+import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
-import styles from './Config.less';
 
-const CodePreview: React.FC = ({ children }) => (
-  <pre className={styles.pre}>
-    <code>
-      <Typography.Text copyable>{children}</Typography.Text>
-    </code>
-  </pre>
-);
+/**
+ * @en-US Add node
+ * @zh-CN 添加节点
+ * @param fields
+ */
+const handleAdd = async (fields: API.RuleListItem) => {
+  const hide = message.loading('正在添加');
+  try {
+    await addRule({ ...fields });
+    hide();
+    message.success('Added successfully');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('Adding failed, please try again!');
+    return false;
+  }
+};
 
-const Welcome: React.FC = () => {
+/**
+ * @en-US Update node
+ * @zh-CN 更新节点
+ *
+ * @param fields
+ */
+// const handleUpdate = async (fields: FormValueType) => {
+//   const hide = message.loading('Configuring');
+//   try {
+//     await updateRule({
+//       name: fields.name,
+//       desc: fields.desc,
+//       key: fields.key,
+//     });
+//     hide();
+
+//     message.success('Configuration is successful');
+//     return true;
+//   } catch (error) {
+//     hide();
+//     message.error('Configuration failed, please try again!');
+//     return false;
+//   }
+// };
+
+/**
+ *  Delete node
+ * @zh-CN 删除节点
+ *
+ * @param selectedRows
+ */
+const handleRemove = async (selectedRows: API.RuleListItem[]) => {
+  const hide = message.loading('正在删除');
+  if (!selectedRows) return true;
+  try {
+    await removeRule({
+      key: selectedRows.map((row) => row.key),
+    });
+    hide();
+    message.success('Deleted successfully and will refresh soon');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('Delete failed, please try again');
+    return false;
+  }
+};
+
+const TableList: React.FC = () => {
+  /**
+   * @en-US Pop-up window of new window
+   * @zh-CN 新建窗口的弹窗
+   *  */
+  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  /**
+   * @en-US The pop-up window of the distribution update window
+   * @zh-CN 分布更新窗口的弹窗
+   * */
+  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
+
+  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const actionRef = useRef<ActionType>();
+  const [currentRow, setCurrentRow] = useState<API.ConfigItem>();
+  const [selectedRowsState, setSelectedRows] = useState<API.ConfigItem[]>([]);
+
   const intl = useIntl();
+
+  const columns: ProColumns<API.ConfigItem>[] = [
+    {
+      title: <FormattedMessage id="pages.configTable.titleName" defaultMessage="Name" />,
+      dataIndex: 'config_name',
+      tip: 'Configuation name',
+      render: (dom, entity) => {
+        return (
+          <a
+            onClick={() => {
+              setCurrentRow(entity);
+              setShowDetail(true);
+            }}
+          >
+            {dom}
+          </a>
+        );
+      },
+    },
+    {
+      title: (
+        <FormattedMessage id="pages.configTable.titleDescription" defaultMessage="Description" />
+      ),
+      dataIndex: 'config_description',
+      valueType: 'textarea',
+    },
+    {
+      title: <FormattedMessage id="pages.configTable.titleType" defaultMessage="Type" />,
+      dataIndex: 'config_type',
+      valueEnum: {
+        '2D': {
+          text: <FormattedMessage id="pages.configTable.titleType.2d" defaultMessage="2D" />,
+        },
+        '3D_SINGLE_PLANE': {
+          text: (
+            <FormattedMessage
+              id="pages.configTable.titleType.3ds"
+              defaultMessage="3D Single Plane"
+            />
+          ),
+        },
+        '3D_BI_PLANE': {
+          text: (
+            <FormattedMessage id="pages.configTable.titleType.3db" defaultMessage="3D Bi Plane" />
+          ),
+        },
+      },
+    },
+    {
+      title: <FormattedMessage id="pages.configTable.titleNA" defaultMessage="NA" />,
+      dataIndex: 'na',
+      sorter: true,
+      hideInForm: true,
+    },
+    {
+      title: <FormattedMessage id="pages.configTable.titleOptions" defaultMessage="Options" />,
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => [
+        <a
+          key="edit"
+          onClick={() => {
+            handleUpdateModalVisible(true);
+            setCurrentRow(record);
+          }}
+        >
+          <FormattedMessage id="pages.configTable.edit" defaultMessage="Edit" />
+        </a>,
+        <a key="delete">
+          <FormattedMessage id="pages.configTable.delete" defaultMessage="Delete" />
+        </a>,
+      ],
+    },
+  ];
 
   return (
     <PageContainer>
-      <Card>
-        <Alert
-          message={intl.formatMessage({
-            id: 'pages.welcome.alertMessage',
-            defaultMessage: 'Faster and stronger heavy-duty components have been released.',
-          })}
-          type="success"
-          showIcon
-          banner
-          style={{
-            margin: -12,
-            marginBottom: 24,
-          }}
-        />
-        <Typography.Text strong>
-          <a
-            href="https://procomponents.ant.design/components/table"
-            rel="noopener noreferrer"
-            target="__blank"
+      <ProTable<API.ConfigItem, API.PageParams>
+        headerTitle={intl.formatMessage({
+          id: 'pages.configTable.title',
+          defaultMessage: 'All configurations',
+        })}
+        actionRef={actionRef}
+        rowKey="config_name"
+        search={{
+          labelWidth: 120,
+        }}
+        toolBarRender={() => [
+          <Button
+            type="primary"
+            key="primary"
+            onClick={() => {
+              handleModalVisible(true);
+            }}
           >
-            <FormattedMessage id="pages.welcome.link" defaultMessage="Welcome" />
-          </a>
-        </Typography.Text>
-        <CodePreview>yarn add @ant-design/pro-components</CodePreview>
-      </Card>
+            <PlusOutlined /> <FormattedMessage id="pages.configTable.new" defaultMessage="New" />
+          </Button>,
+        ]}
+        request={getUserConfigs}
+        columns={columns}
+        rowSelection={{
+          onChange: (_, selectedRows) => {
+            setSelectedRows(selectedRows);
+          },
+        }}
+      />
+      {/* {selectedRowsState?.length > 0 && (
+        <FooterToolbar
+          extra={
+            <div>
+              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="Chosen" />{' '}
+              <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
+              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
+              &nbsp;&nbsp;
+              <span>
+                <FormattedMessage
+                  id="pages.searchTable.totalServiceCalls"
+                  defaultMessage="Total number of service calls"
+                />{' '}
+                {selectedRowsState.reduce((pre, item) => pre + item.callNo!, 0)}{' '}
+                <FormattedMessage id="pages.searchTable.tenThousand" defaultMessage="万" />
+              </span>
+            </div>
+          }
+        >
+          <Button
+            onClick={async () => {
+              await handleRemove(selectedRowsState);
+              setSelectedRows([]);
+              actionRef.current?.reloadAndRest?.();
+            }}
+          >
+            <FormattedMessage
+              id="pages.searchTable.batchDeletion"
+              defaultMessage="Batch deletion"
+            />
+          </Button>
+          <Button type="primary">
+            <FormattedMessage
+              id="pages.searchTable.batchApproval"
+              defaultMessage="Batch approval"
+            />
+          </Button>
+        </FooterToolbar>
+      )} */}
+      {/* <ModalForm
+        title={intl.formatMessage({
+          id: 'pages.searchTable.createForm.newRule',
+          defaultMessage: 'New configuration',
+        })}
+        width="400px"
+        visible={createModalVisible}
+        onVisibleChange={handleModalVisible}
+        onFinish={async (value) => {
+          const success = await handleAdd(value as API.RuleListItem);
+          if (success) {
+            handleModalVisible(false);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }}
+      >
+        <ProFormText
+          rules={[
+            {
+              required: true,
+              message: (
+                <FormattedMessage
+                  id="pages.searchTable.ruleName"
+                  defaultMessage="Rule name is required"
+                />
+              ),
+            },
+          ]}
+          width="md"
+          name="name"
+        />
+        <ProFormTextArea width="md" name="desc" />
+      </ModalForm> */}
+      {/* <UpdateForm
+        onSubmit={async (value) => {
+          const success = await handleUpdate(value);
+          if (success) {
+            handleUpdateModalVisible(false);
+            setCurrentRow(undefined);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }}
+        onCancel={() => {
+          handleUpdateModalVisible(false);
+          if (!showDetail) {
+            setCurrentRow(undefined);
+          }
+        }}
+        updateModalVisible={updateModalVisible}
+        values={currentRow || {}}
+      /> */}
+
+      {/* <Drawer
+        width={600}
+        visible={showDetail}
+        onClose={() => {
+          setCurrentRow(undefined);
+          setShowDetail(false);
+        }}
+        closable={false}
+      >
+        {currentRow?.config_name && (
+          <ProDescriptions<API.ConfigItem>
+            column={2}
+            title={currentRow?.config_name}
+            request={async () => ({
+              data: currentRow || {},
+            })}
+            params={{
+              id: currentRow?.config_name,
+            }}
+            columns={columns as ProDescriptionsItemProps<API.ConfigItem>[]}
+          />
+        )}
+      </Drawer> */}
     </PageContainer>
   );
 };
 
-export default Welcome;
+export default TableList;

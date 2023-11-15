@@ -2,11 +2,31 @@
 /* eslint-disable */
 
 declare namespace API {
-  type TaskType = '2D' | '3D_single_plane' | '3D_bi_plane';
-  type TaskStatus = 'waiting' | 'processing' | 'success' | 'failed';
+  type ConfigType = '2D' | '3D_SINGLE_PLANE' | '3D_BI_PLANE';
+  type ConfigItem = {
+    config_id: string;
+    config_name: string;
+    config_description: string;
+    config_type: ConfigType;
+    user_id: string;
+    na: number;
+  };
+
+  // type GetUserConfigsParams = {
+  //   user_id: string;
+  // };
+
+  type ConfigList = {
+    data?: ConfigItem[];
+    total?: number;
+    success?: boolean;
+  };
+
+  type TaskType = '2D' | '3D_SINGLE_PLANE' | '3D_BI_PLANE';
+  type TaskStatus = 'WAITING' | 'PROCESSING' | 'SUCCESS' | 'FAILED';
 
   type TaskItem = {
-    id: number;
+    task_id: string;
     task_name: string;
     task_description: string;
     task_type: TaskType;
@@ -23,10 +43,6 @@ declare namespace API {
 
   type GetUserTasksParams = {
     user_id: number;
-  };
-
-  type GetUserTasksResult = {
-    data: TaskItem[];
   };
 
   /* template defined type */
