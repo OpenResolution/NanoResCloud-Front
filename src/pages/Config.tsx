@@ -1,4 +1,3 @@
-import { addRule, removeRule, rule, updateRule } from '@/services/api/api';
 import { getUserConfigs } from '@/services/api/config';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
@@ -9,6 +8,8 @@ import {
   ProDescriptions,
   ProFormText,
   ProFormTextArea,
+  ProFormSelect,
+  ProFormDigit,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Drawer, Input, message } from 'antd';
@@ -20,10 +21,10 @@ import { FormattedMessage, useIntl } from 'umi';
  * @zh-CN 添加节点
  * @param fields
  */
-const handleAdd = async (fields: API.RuleListItem) => {
+const handleAdd = async (fields: API.ConfigItem) => {
   const hide = message.loading('正在添加');
   try {
-    await addRule({ ...fields });
+    // await addRule({ ...fields });
     hide();
     message.success('Added successfully');
     return true;
@@ -65,29 +66,29 @@ const handleAdd = async (fields: API.RuleListItem) => {
  *
  * @param selectedRows
  */
-const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map((row) => row.key),
-    });
-    hide();
-    message.success('Deleted successfully and will refresh soon');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Delete failed, please try again');
-    return false;
-  }
-};
+// const handleRemove = async (selectedRows: API.RuleListItem[]) => {
+//   const hide = message.loading('正在删除');
+//   if (!selectedRows) return true;
+//   try {
+//     await removeRule({
+//       key: selectedRows.map((row) => row.key),
+//     });
+//     hide();
+//     message.success('Deleted successfully and will refresh soon');
+//     return true;
+//   } catch (error) {
+//     hide();
+//     message.error('Delete failed, please try again');
+//     return false;
+//   }
+// };
 
 const TableList: React.FC = () => {
   /**
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
    *  */
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
   /**
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
@@ -184,15 +185,14 @@ const TableList: React.FC = () => {
         })}
         actionRef={actionRef}
         rowKey="config_name"
-        search={{
-          labelWidth: 120,
-        }}
+        // hide search panel
+        search={false}
         toolBarRender={() => [
           <Button
             type="primary"
             key="primary"
             onClick={() => {
-              handleModalVisible(true);
+              handleModalOpen(true);
             }}
           >
             <PlusOutlined /> <FormattedMessage id="pages.configTable.new" defaultMessage="New" />
@@ -245,18 +245,18 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )} */}
-      {/* <ModalForm
+      <ModalForm
         title={intl.formatMessage({
-          id: 'pages.searchTable.createForm.newRule',
+          id: 'pages.configTable.createForm.newConfig',
           defaultMessage: 'New configuration',
         })}
-        width="400px"
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
+        // width="400px"
+        open={createModalOpen}
+        onOpenChange={handleModalOpen}
         onFinish={async (value) => {
-          const success = await handleAdd(value as API.RuleListItem);
+          const success = await handleAdd(value as API.ConfigItem);
           if (success) {
-            handleModalVisible(false);
+            handleModalOpen(false);
             if (actionRef.current) {
               actionRef.current.reload();
             }
@@ -269,17 +269,40 @@ const TableList: React.FC = () => {
               required: true,
               message: (
                 <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="Rule name is required"
+                  id="pages.configTable.titleName.message"
+                  defaultMessage="Name is required"
                 />
               ),
             },
           ]}
-          width="md"
-          name="name"
+          // width="md"
+          name="config_name"
+          label="Name"
         />
-        <ProFormTextArea width="md" name="desc" />
-      </ModalForm> */}
+        <ProFormTextArea
+          // width="md"
+          name="config_description"
+          label="Description"
+        />
+        <ProFormSelect
+          name="config_type"
+          label="Type"
+          valueEnum={{
+            twod: '2D',
+            threed_single_plane: '3D_SINGLE_PLANE',
+            threed_bi_plane: '3D_BI_PLANE',
+          }}
+          placeholder="Please select a type"
+          rules={[{ required: true, message: 'Type is required' }]}
+        />
+        <ProFormDigit
+          label="NA"
+          name="na"
+          min={0.5}
+          max={1.5}
+          rules={[{ required: true, message: 'NA is required' }]}
+        />
+      </ModalForm>
       {/* <UpdateForm
         onSubmit={async (value) => {
           const success = await handleUpdate(value);
@@ -303,26 +326,87 @@ const TableList: React.FC = () => {
 
       {/* <Drawer
         width={600}
-        visible={showDetail}
+        open={showDetail}
         onClose={() => {
           setCurrentRow(undefined);
           setShowDetail(false);
         }}
         closable={false}
       >
-        {currentRow?.config_name && (
-          <ProDescriptions<API.ConfigItem>
-            column={2}
-            title={currentRow?.config_name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.config_name,
-            }}
-            columns={columns as ProDescriptionsItemProps<API.ConfigItem>[]}
-          />
-        )}
+        <ProDescriptions
+          title={currentRow?.config_name}
+
+          // dataSource={{
+          //   id: '这是一段文本columns',
+          //   date: '20200809',
+          //   money: '1212100',
+          //   state: 'all',
+          //   state2: 'open',
+          // }}
+          // columns={[
+          //   {
+          //     title: '文本',
+          //     key: 'text',
+          //     dataIndex: 'id',
+          //     ellipsis: true,
+          //     copyable: true,
+          //   },
+          //   {
+          //     title: '状态',
+          //     key: 'state',
+          //     dataIndex: 'state',
+          //     valueType: 'select',
+          //     valueEnum: {
+          //       all: { text: '全部', status: 'Default' },
+          //       open: {
+          //         text: '未解决',
+          //         status: 'Error',
+          //       },
+          //       closed: {
+          //         text: '已解决',
+          //         status: 'Success',
+          //       },
+          //     },
+          //   },
+          //   {
+          //     title: '状态2',
+          //     key: 'state2',
+          //     dataIndex: 'state2',
+          //   },
+          //   {
+          //     title: '时间',
+          //     key: 'date',
+          //     dataIndex: 'date',
+          //     valueType: 'date',
+          //   },
+          //   {
+          //     title: 'money',
+          //     key: 'money',
+          //     dataIndex: 'money',
+          //     valueType: 'money',
+          //   },
+          //   {
+          //     title: '操作',
+          //     valueType: 'option',
+          //     render: () => [
+          //       <a target="_blank" rel="noopener noreferrer" key="link">
+          //         链路
+          //       </a>,
+          //       <a target="_blank" rel="noopener noreferrer" key="warning">
+          //         报警
+          //       </a>,
+          //       <a target="_blank" rel="noopener noreferrer" key="view">
+          //         查看
+          //       </a>,
+          //     ],
+          //   },
+          // ]}
+        >
+          <div>test</div>
+          <ProDescriptions.Item label="百分比" valueType="percent">
+            100
+          </ProDescriptions.Item>
+        </ProDescriptions>
       </Drawer> */}
     </PageContainer>
   );
