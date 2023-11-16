@@ -95,10 +95,12 @@ const TableList: React.FC = () => {
    * */
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
 
-  const [showDetail, setShowDetail] = useState<boolean>(false);
-  const actionRef = useRef<ActionType>();
+  // for showDetails drawer
   const [currentRow, setCurrentRow] = useState<API.ConfigItem>();
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+
   const [selectedRowsState, setSelectedRows] = useState<API.ConfigItem[]>([]);
+  const actionRef = useRef<ActionType>();
 
   const intl = useIntl();
 
@@ -112,7 +114,7 @@ const TableList: React.FC = () => {
           <a
             onClick={() => {
               setCurrentRow(entity);
-              setShowDetail(true);
+              setShowDetails(true);
             }}
           >
             {dom}
@@ -193,6 +195,9 @@ const TableList: React.FC = () => {
                 setSelectedRows([]);
                 // refresh after deletion
                 actionRef.current?.reloadAndRest?.();
+                // if showDetails drawer is open, need to close it
+                setCurrentRow(undefined);
+                setShowDetails(false);
               },
             })
           }
@@ -351,10 +356,10 @@ const TableList: React.FC = () => {
 
       <Drawer
         width={600}
-        open={showDetail}
+        open={showDetails}
         onClose={() => {
           setCurrentRow(undefined);
-          setShowDetail(false);
+          setShowDetails(false);
         }}
         closable={false}
       >
