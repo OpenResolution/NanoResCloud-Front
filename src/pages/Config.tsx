@@ -160,22 +160,31 @@ const TableList: React.FC = () => {
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
-        <a
+        <Button
           key="edit"
+          type="link"
+          // use small size to avoid enlarging the cell
+          size="small"
           onClick={() => {
             handleUpdateModalVisible(true);
             setCurrentRow(record);
           }}
         >
           <FormattedMessage id="pages.configTable.edit" defaultMessage="Edit" />
-        </a>,
-        <a
+        </Button>,
+        <Button
           key="delete"
+          type="link"
+          size="small"
+          danger
           onClick={() =>
             Modal.confirm({
               title: 'Delete Configuration',
               content: 'Are you sure you want to delete this configuration?',
               okText: 'Delete',
+              okButtonProps: {
+                danger: true,
+              },
               cancelText: 'Cancel',
               onOk: async () => {
                 // single-entry deletion is a special case of batch deletion
@@ -189,7 +198,7 @@ const TableList: React.FC = () => {
           }
         >
           <FormattedMessage id="pages.configTable.delete" defaultMessage="Delete" />
-        </a>,
+        </Button>,
       ],
     },
   ];
@@ -224,45 +233,43 @@ const TableList: React.FC = () => {
           },
         }}
       />
-      {/* {selectedRowsState?.length > 0 && (
+      {selectedRowsState?.length > 0 && (
         <FooterToolbar
           extra={
             <div>
-              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="Chosen" />{' '}
+              <FormattedMessage id="pages.configTable.chosen" defaultMessage="Chosen" />{' '}
               <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
-              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
-              &nbsp;&nbsp;
-              <span>
-                <FormattedMessage
-                  id="pages.searchTable.totalServiceCalls"
-                  defaultMessage="Total number of service calls"
-                />{' '}
-                {selectedRowsState.reduce((pre, item) => pre + item.callNo!, 0)}{' '}
-                <FormattedMessage id="pages.searchTable.tenThousand" defaultMessage="万" />
-              </span>
+              <FormattedMessage id="pages.configTable.items" defaultMessage="items" />
             </div>
           }
         >
           <Button
-            onClick={async () => {
-              await handleRemove(selectedRowsState);
-              setSelectedRows([]);
-              actionRef.current?.reloadAndRest?.();
-            }}
+            danger
+            type="primary"
+            onClick={() =>
+              Modal.confirm({
+                title: 'Delete Configurations',
+                content: 'Are you sure you want to delete selected configurations?',
+                okText: 'Delete',
+                okButtonProps: {
+                  danger: true,
+                },
+                cancelText: 'Cancel',
+                onOk: async () => {
+                  await handleRemove(selectedRowsState);
+                  setSelectedRows([]);
+                  actionRef.current?.reloadAndRest?.();
+                },
+              })
+            }
           >
             <FormattedMessage
-              id="pages.searchTable.batchDeletion"
+              id="pages.configTable.batchDeletion"
               defaultMessage="Batch deletion"
             />
           </Button>
-          <Button type="primary">
-            <FormattedMessage
-              id="pages.searchTable.batchApproval"
-              defaultMessage="Batch approval"
-            />
-          </Button>
         </FooterToolbar>
-      )} */}
+      )}
       <ModalForm
         title={intl.formatMessage({
           id: 'pages.configTable.createForm.newConfig',
