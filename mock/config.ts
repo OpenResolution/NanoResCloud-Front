@@ -24,6 +24,19 @@ function getUserConfigs(req: Request, res: Response, u: string) {
   return res.json(result);
 }
 
+function deleteConfigs(req: Request, res: Response, u: string, b: Request) {
+  const { config_ids } = req.query;
+  const result = {
+    success: true,
+  };
+
+  configs.array = configs.array.filter((item) => config_ids?.indexOf(item.config_id) === -1);
+  //configs.array = configs.array.filter((obj) => !(obj.config_id in config_ids));
+
+  return res.json(result);
+}
+
 export default {
-  'GET /api/config/getUserConfigs': getUserConfigs,
+  'GET /api/config': getUserConfigs,
+  'DELETE /api/config': deleteConfigs,
 };

@@ -12,8 +12,23 @@ export async function getUserConfigs(
   },
   options?: { [key: string]: any },
 ) {
-  return request<API.ConfigList>('/api/config/getUserConfigs', {
+  return request<API.ConfigList>('/api/config', {
     method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+export async function deleteConfigs(
+  params: {
+    config_ids: string[];
+  },
+  options?: { [key: string]: any },
+) {
+  return request<Record<string, any>>('/api/config', {
+    method: 'DELETE',
     params: {
       ...params,
     },

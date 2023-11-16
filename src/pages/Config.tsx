@@ -1,4 +1,4 @@
-import { getUserConfigs } from '@/services/api/config';
+import { getUserConfigs, deleteConfigs } from '@/services/api/config';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -12,7 +12,7 @@ import {
   ProFormDigit,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Drawer, Input, message } from 'antd';
+import { Button, Drawer, Input, message, Modal } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
@@ -61,27 +61,27 @@ const handleAdd = async (fields: API.ConfigItem) => {
 // };
 
 /**
- *  Delete node
+ * @en-US Delete node
  * @zh-CN 删除节点
  *
  * @param selectedRows
  */
-// const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-//   const hide = message.loading('正在删除');
-//   if (!selectedRows) return true;
-//   try {
-//     await removeRule({
-//       key: selectedRows.map((row) => row.key),
-//     });
-//     hide();
-//     message.success('Deleted successfully and will refresh soon');
-//     return true;
-//   } catch (error) {
-//     hide();
-//     message.error('Delete failed, please try again');
-//     return false;
-//   }
-// };
+const handleRemove = async (selectedRows: API.ConfigItem[]) => {
+  const hide = message.loading('Deleting');
+  if (!selectedRows) return true;
+  try {
+    await deleteConfigs({
+      config_ids: selectedRows.map((row) => row.config_id),
+    });
+    hide();
+    message.success('Deleted successfully');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('Deletion failed, please try again');
+    return false;
+  }
+};
 
 const TableList: React.FC = () => {
   /**
@@ -169,7 +169,25 @@ const TableList: React.FC = () => {
         >
           <FormattedMessage id="pages.configTable.edit" defaultMessage="Edit" />
         </a>,
-        <a key="delete">
+        <a
+          key="delete"
+          onClick={() =>
+            Modal.confirm({
+              title: 'Delete Configuration',
+              content: 'Are you sure you want to delete this configuration?',
+              okText: 'Delete',
+              cancelText: 'Cancel',
+              onOk: async () => {
+                // single-entry deletion is a special case of batch deletion
+                await handleRemove([record]);
+                // this maybe optional
+                setSelectedRows([]);
+                // refresh after deletion
+                actionRef.current?.reloadAndRest?.();
+              },
+            })
+          }
+        >
           <FormattedMessage id="pages.configTable.delete" defaultMessage="Delete" />
         </a>,
       ],
@@ -326,7 +344,7 @@ const TableList: React.FC = () => {
 
       <Drawer
         width={600}
-        visible={showDetail}
+        open={showDetail}
         onClose={() => {
           setCurrentRow(undefined);
           setShowDetail(false);
