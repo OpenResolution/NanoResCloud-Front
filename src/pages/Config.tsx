@@ -251,8 +251,8 @@ const TableList: React.FC = () => {
           defaultMessage: 'New configuration',
         })}
         // width="400px"
-        open={createModalOpen}
-        onOpenChange={handleModalOpen}
+        visible={createModalOpen}
+        onVisibleChange={handleModalOpen}
         onFinish={async (value) => {
           const success = await handleAdd(value as API.ConfigItem);
           if (success) {
@@ -324,90 +324,29 @@ const TableList: React.FC = () => {
         values={currentRow || {}}
       /> */}
 
-      {/* <Drawer
+      <Drawer
         width={600}
-        open={showDetail}
+        visible={showDetail}
         onClose={() => {
           setCurrentRow(undefined);
           setShowDetail(false);
         }}
         closable={false}
       >
-        <ProDescriptions
-          title={currentRow?.config_name}
-
-          // dataSource={{
-          //   id: '这是一段文本columns',
-          //   date: '20200809',
-          //   money: '1212100',
-          //   state: 'all',
-          //   state2: 'open',
-          // }}
-          // columns={[
-          //   {
-          //     title: '文本',
-          //     key: 'text',
-          //     dataIndex: 'id',
-          //     ellipsis: true,
-          //     copyable: true,
-          //   },
-          //   {
-          //     title: '状态',
-          //     key: 'state',
-          //     dataIndex: 'state',
-          //     valueType: 'select',
-          //     valueEnum: {
-          //       all: { text: '全部', status: 'Default' },
-          //       open: {
-          //         text: '未解决',
-          //         status: 'Error',
-          //       },
-          //       closed: {
-          //         text: '已解决',
-          //         status: 'Success',
-          //       },
-          //     },
-          //   },
-          //   {
-          //     title: '状态2',
-          //     key: 'state2',
-          //     dataIndex: 'state2',
-          //   },
-          //   {
-          //     title: '时间',
-          //     key: 'date',
-          //     dataIndex: 'date',
-          //     valueType: 'date',
-          //   },
-          //   {
-          //     title: 'money',
-          //     key: 'money',
-          //     dataIndex: 'money',
-          //     valueType: 'money',
-          //   },
-          //   {
-          //     title: '操作',
-          //     valueType: 'option',
-          //     render: () => [
-          //       <a target="_blank" rel="noopener noreferrer" key="link">
-          //         链路
-          //       </a>,
-          //       <a target="_blank" rel="noopener noreferrer" key="warning">
-          //         报警
-          //       </a>,
-          //       <a target="_blank" rel="noopener noreferrer" key="view">
-          //         查看
-          //       </a>,
-          //     ],
-          //   },
-          // ]}
-        >
-          <div>test</div>
-          <ProDescriptions.Item label="百分比" valueType="percent">
-            100
-          </ProDescriptions.Item>
-        </ProDescriptions>
-      </Drawer> */}
+        {currentRow?.config_name && (
+          <ProDescriptions<API.ConfigItem>
+            column={2}
+            title={currentRow?.config_name}
+            request={async () => ({
+              data: currentRow || {},
+            })}
+            params={{
+              id: currentRow?.config_name,
+            }}
+            columns={columns as ProDescriptionsItemProps<API.ConfigItem>[]}
+          />
+        )}
+      </Drawer>
     </PageContainer>
   );
 };
