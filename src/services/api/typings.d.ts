@@ -3,13 +3,17 @@
 
 declare namespace API {
   type ConfigType = '2D' | '3D_SINGLE_PLANE' | '3D_BI_PLANE';
-  type ConfigItem = {
-    config_id: string;
+
+  type ConfigFormFields = {
     config_name: string;
     config_description: string;
     config_type: ConfigType;
     user_id: string;
     na: number;
+  };
+
+  type ConfigItem = ConfigFormFields & {
+    config_id: string;
   };
 
   // type GetUserConfigsParams = {

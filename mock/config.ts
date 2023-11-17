@@ -36,7 +36,25 @@ function deleteConfigs(req: Request, res: Response, u: string, b: Request) {
   return res.json(result);
 }
 
+function createConfig(req: Request, res: Response, u: string) {
+  const configFormFields = req.query;
+
+  const result = {
+    success: true,
+  };
+
+  configs.array.unshift({
+    ...mockjs.mock({
+      config_id: '@id',
+    }),
+    ...configFormFields,
+  });
+
+  return res.json(result);
+}
+
 export default {
   'GET /api/config': getUserConfigs,
   'DELETE /api/config': deleteConfigs,
+  'POST /api/config': createConfig,
 };

@@ -35,3 +35,13 @@ export async function deleteConfigs(
     ...(options || {}),
   });
 }
+
+export async function createConfig(params: API.ConfigFormFields, options?: { [key: string]: any }) {
+  return request<Record<string, any>>('/api/config', {
+    method: 'POST',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}

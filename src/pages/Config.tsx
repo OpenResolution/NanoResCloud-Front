@@ -1,6 +1,11 @@
-import { getUserConfigs, deleteConfigs } from '@/services/api/config';
+import { getUserConfigs, deleteConfigs, createConfig } from '@/services/api/config';
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
+import type {
+  ActionType,
+  ProColumns,
+  ProDescriptionsItemProps,
+  ProFormInstance,
+} from '@ant-design/pro-components';
 import {
   FooterToolbar,
   ModalForm,
@@ -16,21 +21,16 @@ import { Button, Drawer, Input, message, Modal } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
-/**
- * @en-US Add node
- * @zh-CN 添加节点
- * @param fields
- */
-const handleAdd = async (fields: API.ConfigItem) => {
-  const hide = message.loading('正在添加');
+const handleCreate = async (fields: API.ConfigFormFields) => {
+  const hide = message.loading('Creating');
   try {
-    // await addRule({ ...fields });
+    await createConfig({ ...fields });
     hide();
-    message.success('Added successfully');
+    message.success('Created successfully');
     return true;
   } catch (error) {
     hide();
-    message.error('Adding failed, please try again!');
+    message.error('Creation failed, please try again!');
     return false;
   }
 };
@@ -88,7 +88,7 @@ const TableList: React.FC = () => {
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
    *  */
-  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
+  const [createModalOpen, handleCreateModalOpen] = useState<boolean>(false);
   /**
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
@@ -99,12 +99,35 @@ const TableList: React.FC = () => {
   const [currentRow, setCurrentRow] = useState<API.ConfigItem>();
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
-  const [selectedRowsState, setSelectedRows] = useState<API.ConfigItem[]>([]);
+  const [selectedRows, setSelectedRows] = useState<API.ConfigItem[]>([]);
   const actionRef = useRef<ActionType>();
+  // for configuration creation form
+  const formRef = useRef<ProFormInstance>();
 
   const intl = useIntl();
 
+  const configTypeValueEnum = {
+    '2D': {
+      text: <FormattedMessage id="pages.configTable.titleType.2d" defaultMessage="2D" />,
+    },
+    '3D_SINGLE_PLANE': {
+      text: (
+        <FormattedMessage id="pages.configTable.titleType.3ds" defaultMessage="3D Single-Plane" />
+      ),
+    },
+    '3D_BI_PLANE': {
+      text: <FormattedMessage id="pages.configTable.titleType.3db" defaultMessage="3D Bi-Plane" />,
+    },
+  };
+
   const columns: ProColumns<API.ConfigItem>[] = [
+    {
+      // used as key, hidden from display
+      dataIndex: 'config_id',
+      hideInSearch: true,
+      hideInTable: true,
+      hideInDescriptions: true,
+    },
     {
       title: <FormattedMessage id="pages.configTable.titleName" defaultMessage="Name" />,
       dataIndex: 'config_name',
@@ -132,24 +155,7 @@ const TableList: React.FC = () => {
     {
       title: <FormattedMessage id="pages.configTable.titleType" defaultMessage="Type" />,
       dataIndex: 'config_type',
-      valueEnum: {
-        '2D': {
-          text: <FormattedMessage id="pages.configTable.titleType.2d" defaultMessage="2D" />,
-        },
-        '3D_SINGLE_PLANE': {
-          text: (
-            <FormattedMessage
-              id="pages.configTable.titleType.3ds"
-              defaultMessage="3D Single Plane"
-            />
-          ),
-        },
-        '3D_BI_PLANE': {
-          text: (
-            <FormattedMessage id="pages.configTable.titleType.3db" defaultMessage="3D Bi Plane" />
-          ),
-        },
-      },
+      valueEnum: configTypeValueEnum,
     },
     {
       title: <FormattedMessage id="pages.configTable.titleNA" defaultMessage="NA" />,
@@ -216,7 +222,8 @@ const TableList: React.FC = () => {
           defaultMessage: 'All configurations',
         })}
         actionRef={actionRef}
-        rowKey="config_name"
+        // rowKey must be unique for row selection to work properly
+        rowKey="config_id"
         // hide search panel
         search={false}
         toolBarRender={() => [
@@ -224,7 +231,7 @@ const TableList: React.FC = () => {
             type="primary"
             key="primary"
             onClick={() => {
-              handleModalOpen(true);
+              handleCreateModalOpen(true);
             }}
           >
             <PlusOutlined /> <FormattedMessage id="pages.configTable.new" defaultMessage="New" />
@@ -233,17 +240,17 @@ const TableList: React.FC = () => {
         request={getUserConfigs}
         columns={columns}
         rowSelection={{
-          onChange: (_, selectedRows) => {
-            setSelectedRows(selectedRows);
+          onChange: (_, nextSelectedRows) => {
+            setSelectedRows(nextSelectedRows);
           },
         }}
       />
-      {selectedRowsState?.length > 0 && (
+      {selectedRows?.length > 0 && (
         <FooterToolbar
           extra={
             <div>
               <FormattedMessage id="pages.configTable.chosen" defaultMessage="Chosen" />{' '}
-              <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
+              <a style={{ fontWeight: 600 }}>{selectedRows.length}</a>{' '}
               <FormattedMessage id="pages.configTable.items" defaultMessage="items" />
             </div>
           }
@@ -261,7 +268,7 @@ const TableList: React.FC = () => {
                 },
                 cancelText: 'Cancel',
                 onOk: async () => {
-                  await handleRemove(selectedRowsState);
+                  await handleRemove(selectedRows);
                   setSelectedRows([]);
                   actionRef.current?.reloadAndRest?.();
                 },
@@ -282,14 +289,17 @@ const TableList: React.FC = () => {
         })}
         // width="400px"
         visible={createModalOpen}
-        onVisibleChange={handleModalOpen}
+        onVisibleChange={handleCreateModalOpen}
+        formRef={formRef}
         onFinish={async (value) => {
-          const success = await handleAdd(value as API.ConfigItem);
+          const success = await handleCreate(value as API.ConfigFormFields);
           if (success) {
-            handleModalOpen(false);
+            handleCreateModalOpen(false);
             if (actionRef.current) {
               actionRef.current.reload();
             }
+            // reset fields after successful submission
+            formRef.current?.resetFields();
           }
         }}
       >
@@ -317,11 +327,7 @@ const TableList: React.FC = () => {
         <ProFormSelect
           name="config_type"
           label="Type"
-          valueEnum={{
-            twod: '2D',
-            threed_single_plane: '3D_SINGLE_PLANE',
-            threed_bi_plane: '3D_BI_PLANE',
-          }}
+          valueEnum={configTypeValueEnum}
           placeholder="Please select a type"
           rules={[{ required: true, message: 'Type is required' }]}
         />
