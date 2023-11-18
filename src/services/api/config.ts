@@ -21,6 +21,16 @@ export async function getUserConfigs(
   });
 }
 
+export async function createConfig(params: API.ConfigFormFields, options?: { [key: string]: any }) {
+  return request<Record<string, any>>('/api/config', {
+    method: 'POST',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 export async function deleteConfigs(
   params: {
     config_ids: string[];
@@ -36,9 +46,9 @@ export async function deleteConfigs(
   });
 }
 
-export async function createConfig(params: API.ConfigFormFields, options?: { [key: string]: any }) {
+export async function editConfig(params: API.ConfigFormFields, options?: { [key: string]: any }) {
   return request<Record<string, any>>('/api/config', {
-    method: 'POST',
+    method: 'PUT',
     params: {
       ...params,
     },

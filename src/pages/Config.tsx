@@ -1,5 +1,5 @@
-import { getUserConfigs, deleteConfigs, createConfig } from '@/services/api/config';
-import { PlusOutlined } from '@ant-design/icons';
+import { getUserConfigs, createConfig, deleteConfigs, editConfig } from '@/services/api/config';
+import { ApiFilled, PlusOutlined } from '@ant-design/icons';
 import type {
   ActionType,
   ProColumns,
@@ -18,6 +18,7 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Drawer, Input, message, Modal } from 'antd';
+import { ConfigModalForm, ConfigTypeValueEnum } from './ModalForm';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
@@ -35,30 +36,19 @@ const handleCreate = async (fields: API.ConfigFormFields) => {
   }
 };
 
-/**
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-// const handleUpdate = async (fields: FormValueType) => {
-//   const hide = message.loading('Configuring');
-//   try {
-//     await updateRule({
-//       name: fields.name,
-//       desc: fields.desc,
-//       key: fields.key,
-//     });
-//     hide();
-
-//     message.success('Configuration is successful');
-//     return true;
-//   } catch (error) {
-//     hide();
-//     message.error('Configuration failed, please try again!');
-//     return false;
-//   }
-// };
+const handleEdit = async (fields: API.ConfigItem) => {
+  const hide = message.loading('Saving edits');
+  try {
+    await editConfig({ ...fields });
+    hide();
+    message.success('Saved edits');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('Saving failed, please try again!');
+    return false;
+  }
+};
 
 /**
  * @en-US Delete node
@@ -66,7 +56,7 @@ const handleCreate = async (fields: API.ConfigFormFields) => {
  *
  * @param selectedRows
  */
-const handleRemove = async (selectedRows: API.ConfigItem[]) => {
+const handleDelete = async (selectedRows: API.ConfigItem[]) => {
   const hide = message.loading('Deleting');
   if (!selectedRows) return true;
   try {
@@ -93,7 +83,7 @@ const TableList: React.FC = () => {
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
    * */
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
+  const [editModalOpen, handleEditModalOpen] = useState<boolean>(false);
 
   // for showDetails drawer
   const [currentRow, setCurrentRow] = useState<API.ConfigItem>();
@@ -105,20 +95,6 @@ const TableList: React.FC = () => {
   const formRef = useRef<ProFormInstance>();
 
   const intl = useIntl();
-
-  const configTypeValueEnum = {
-    '2D': {
-      text: <FormattedMessage id="pages.configTable.titleType.2d" defaultMessage="2D" />,
-    },
-    '3D_SINGLE_PLANE': {
-      text: (
-        <FormattedMessage id="pages.configTable.titleType.3ds" defaultMessage="3D Single-Plane" />
-      ),
-    },
-    '3D_BI_PLANE': {
-      text: <FormattedMessage id="pages.configTable.titleType.3db" defaultMessage="3D Bi-Plane" />,
-    },
-  };
 
   const columns: ProColumns<API.ConfigItem>[] = [
     {
@@ -155,7 +131,7 @@ const TableList: React.FC = () => {
     {
       title: <FormattedMessage id="pages.configTable.titleType" defaultMessage="Type" />,
       dataIndex: 'config_type',
-      valueEnum: configTypeValueEnum,
+      valueEnum: ConfigTypeValueEnum,
     },
     {
       title: <FormattedMessage id="pages.configTable.titleNA" defaultMessage="NA" />,
@@ -174,8 +150,8 @@ const TableList: React.FC = () => {
           // use small size to avoid enlarging the cell
           size="small"
           onClick={() => {
-            handleUpdateModalVisible(true);
             setCurrentRow(record);
+            handleEditModalOpen(true);
           }}
         >
           <FormattedMessage id="pages.configTable.edit" defaultMessage="Edit" />
@@ -196,7 +172,7 @@ const TableList: React.FC = () => {
               cancelText: 'Cancel',
               onOk: async () => {
                 // single-entry deletion is a special case of batch deletion
-                await handleRemove([record]);
+                await handleDelete([record]);
                 // this maybe optional
                 setSelectedRows([]);
                 // refresh after deletion
@@ -268,7 +244,7 @@ const TableList: React.FC = () => {
                 },
                 cancelText: 'Cancel',
                 onOk: async () => {
-                  await handleRemove(selectedRows);
+                  await handleDelete(selectedRows);
                   setSelectedRows([]);
                   actionRef.current?.reloadAndRest?.();
                 },
@@ -282,83 +258,56 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
-      <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.configTable.createForm.newConfig',
-          defaultMessage: 'New configuration',
-        })}
-        // width="400px"
-        visible={createModalOpen}
-        onVisibleChange={handleCreateModalOpen}
-        formRef={formRef}
-        onFinish={async (value) => {
+
+      <ConfigModalForm
+        onSubmit={async (value) => {
+          // TODO optional fields
           const success = await handleCreate(value as API.ConfigFormFields);
           if (success) {
             handleCreateModalOpen(false);
             if (actionRef.current) {
+              // refresh the table to show the newly created row
               actionRef.current.reload();
             }
-            // reset fields after successful submission
-            formRef.current?.resetFields();
+            // no need to reset fields, because form uses initialValues
+            // formRef.current?.resetFields();
           }
         }}
-      >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.configTable.titleName.message"
-                  defaultMessage="Name is required"
-                />
-              ),
-            },
-          ]}
-          // width="md"
-          name="config_name"
-          label="Name"
-        />
-        <ProFormTextArea
-          // width="md"
-          name="config_description"
-          label="Description"
-        />
-        <ProFormSelect
-          name="config_type"
-          label="Type"
-          valueEnum={configTypeValueEnum}
-          placeholder="Please select a type"
-          rules={[{ required: true, message: 'Type is required' }]}
-        />
-        <ProFormDigit
-          label="NA"
-          name="na"
-          min={0.5}
-          max={1.5}
-          rules={[{ required: true, message: 'NA is required' }]}
-        />
-      </ModalForm>
-      {/* <UpdateForm
+        onCancel={() => {
+          handleCreateModalOpen(false);
+        }}
+        modalOpen={createModalOpen}
+        title={intl.formatMessage({
+          id: 'pages.configTable.createForm.title',
+          defaultMessage: 'New configuration',
+        })}
+      />
+
+      <ConfigModalForm
         onSubmit={async (value) => {
-          const success = await handleUpdate(value);
+          const nextConfig = {
+            config_id: (currentRow as API.ConfigItem).config_id,
+            ...value,
+          };
+          const success = await handleEdit(nextConfig);
           if (success) {
-            handleUpdateModalVisible(false);
-            setCurrentRow(undefined);
+            handleEditModalOpen(false);
             if (actionRef.current) {
               actionRef.current.reload();
             }
           }
         }}
         onCancel={() => {
-          handleUpdateModalVisible(false);
-          if (!showDetail) {
-            setCurrentRow(undefined);
-          }
+          handleEditModalOpen(false);
         }}
-        updateModalVisible={updateModalVisible}
-        values={currentRow || {}}
-      /> */}
+        modalOpen={editModalOpen}
+        // form doesn't need config_id
+        values={(currentRow as API.ConfigFormFields) || {}}
+        title={intl.formatMessage({
+          id: 'pages.configTable.editForm.title',
+          defaultMessage: 'Edit configuration',
+        })}
+      />
 
       <Drawer
         width={600}
@@ -376,9 +325,9 @@ const TableList: React.FC = () => {
             request={async () => ({
               data: currentRow || {},
             })}
-            params={{
-              id: currentRow?.config_name,
-            }}
+            // params={{
+            //   id: currentRow?.config_name,
+            // }}
             columns={columns as ProDescriptionsItemProps<API.ConfigItem>[]}
           />
         )}

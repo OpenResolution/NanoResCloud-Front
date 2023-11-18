@@ -9,7 +9,7 @@ const configs = mockjs.mock({
       config_description: '@sentence',
       config_type: '@pick(["2D", "3D_SINGLE_PLANE", "3D_BI_PLANE"])',
       user_id: '1',
-      'na|1-2.3': 1,
+      na: '@pick(["0.5", "1", "1.5"])',
     },
   ],
 });
@@ -20,18 +20,6 @@ function getUserConfigs(req: Request, res: Response, u: string) {
     total: configs.array.length,
     success: true,
   };
-
-  return res.json(result);
-}
-
-function deleteConfigs(req: Request, res: Response, u: string, b: Request) {
-  const { config_ids } = req.query;
-  const result = {
-    success: true,
-  };
-
-  configs.array = configs.array.filter((item) => config_ids?.indexOf(item.config_id) === -1);
-  //configs.array = configs.array.filter((obj) => !(obj.config_id in config_ids));
 
   return res.json(result);
 }
@@ -53,8 +41,36 @@ function createConfig(req: Request, res: Response, u: string) {
   return res.json(result);
 }
 
+function deleteConfigs(req: Request, res: Response, u: string, b: Request) {
+  const { config_ids } = req.query;
+  const result = {
+    success: true,
+  };
+
+  configs.array = configs.array.filter((item) => config_ids?.indexOf(item.config_id) === -1);
+  //configs.array = configs.array.filter((obj) => !(obj.config_id in config_ids));
+
+  return res.json(result);
+}
+
+function editConfig(req: Request, res: Response, u: string) {
+  const nextConfig = req.query;
+  const result = {
+    success: true,
+  };
+
+  configs.array = configs.array.map((item) => {
+    if (item.config_id === nextConfig.config_id) {
+      return nextConfig;
+    }
+    return item;
+  });
+  return res.json(result);
+}
+
 export default {
   'GET /api/config': getUserConfigs,
-  'DELETE /api/config': deleteConfigs,
   'POST /api/config': createConfig,
+  'DELETE /api/config': deleteConfigs,
+  'PUT /api/config': editConfig,
 };
