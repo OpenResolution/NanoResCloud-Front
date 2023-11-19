@@ -88,9 +88,10 @@ const TableList: React.FC = () => {
   // for showDetails drawer
   const [currentRow, setCurrentRow] = useState<API.ConfigItem>();
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const showDetailsActionRef = useRef<ActionType>();
 
   const [selectedRows, setSelectedRows] = useState<API.ConfigItem[]>([]);
-  const actionRef = useRef<ActionType>();
+  const tableActionRef = useRef<ActionType>();
   // for configuration creation form
   const formRef = useRef<ProFormInstance>();
 
@@ -176,7 +177,7 @@ const TableList: React.FC = () => {
                 // this maybe optional
                 setSelectedRows([]);
                 // refresh after deletion
-                actionRef.current?.reloadAndRest?.();
+                tableActionRef.current?.reloadAndRest?.();
                 // if showDetails drawer is open, need to close it
                 setCurrentRow(undefined);
                 setShowDetails(false);
@@ -197,11 +198,11 @@ const TableList: React.FC = () => {
           id: 'pages.configTable.title',
           defaultMessage: 'All configurations',
         })}
-        actionRef={actionRef}
+        actionRef={tableActionRef}
         // rowKey must be unique for row selection to work properly
         rowKey="config_id"
         // hide search panel
-        search={false}
+        // search={false}
         toolBarRender={() => [
           <Button
             type="primary"
@@ -246,7 +247,7 @@ const TableList: React.FC = () => {
                 onOk: async () => {
                   await handleDelete(selectedRows);
                   setSelectedRows([]);
-                  actionRef.current?.reloadAndRest?.();
+                  tableActionRef.current?.reloadAndRest?.();
                 },
               })
             }
@@ -265,10 +266,9 @@ const TableList: React.FC = () => {
           const success = await handleCreate(value as API.ConfigFormFields);
           if (success) {
             handleCreateModalOpen(false);
-            if (actionRef.current) {
-              // refresh the table to show the newly created row
-              actionRef.current.reload();
-            }
+            // use optional chaining instead of if clause
+            // refresh the table to show the newly created row
+            tableActionRef.current?.reload();
             // no need to reset fields, because form uses initialValues
             // formRef.current?.resetFields();
           }
@@ -292,9 +292,10 @@ const TableList: React.FC = () => {
           const success = await handleEdit(nextConfig);
           if (success) {
             handleEditModalOpen(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
+            tableActionRef.current?.reload();
+            // update currentRow and then reload showDetails
+            setCurrentRow(nextConfig);
+            showDetailsActionRef.current?.reload();
           }
         }}
         onCancel={() => {
@@ -322,13 +323,10 @@ const TableList: React.FC = () => {
           <ProDescriptions<API.ConfigItem>
             column={2}
             title={currentRow?.config_name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            // params={{
-            //   id: currentRow?.config_name,
-            // }}
+            // use local `dataSource` instead of remote `request` for responsiveness
+            dataSource={currentRow || {}}
             columns={columns as ProDescriptionsItemProps<API.ConfigItem>[]}
+            actionRef={showDetailsActionRef}
           />
         )}
       </Drawer>
