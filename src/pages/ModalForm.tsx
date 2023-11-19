@@ -6,7 +6,7 @@ import {
   StepsForm,
 } from '@ant-design/pro-components';
 import { Modal } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
 export type FormValueType = API.ConfigFormFields;
@@ -15,7 +15,8 @@ export type FormProps = {
   onCancel: (flag?: boolean, formVals?: FormValueType) => void;
   onSubmit: (values: FormValueType) => Promise<void>;
   modalOpen: boolean;
-  values?: API.ConfigFormFields;
+  // use Partial<> to allow initiating only part of the fields
+  values?: Partial<API.ConfigFormFields>;
   title: React.ReactNode;
 };
 
@@ -35,6 +36,8 @@ export const ConfigTypeValueEnum = {
 
 export const ConfigModalForm: React.FC<FormProps> = (props) => {
   const intl = useIntl();
+  const [currentConfigType, setCurrentConfigType] = useState<API.ConfigType>('2D');
+
   return (
     // use Modal as outermost layer to utilize its `destroyOnClose` feature
     <Modal
@@ -53,6 +56,14 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
           size: 'small',
         }}
         onFinish={props.onSubmit}
+        // according to docs, "StepsForm inherits from Form.Provider", which has onFormChange
+        onFormChange={(formName, info) => {
+          // watch the change of config_type
+          if (info.changedFields[0].name[0] === 'config_type') {
+            const newValue = info.changedFields[0].value;
+            setCurrentConfigType(newValue);
+          }
+        }}
       >
         <StepsForm.StepForm
           // pass in all values (overkill)
@@ -105,6 +116,24 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
             max={1.5}
             rules={[{ required: true, message: 'NA is required' }]}
           />
+          <ProFormDigit label="Subregion size" name="subregion_size" min={3} max={40} />
+          {['3D_SINGLE_PLANE', '3D_BI_PLANE'].includes(currentConfigType) && (
+            <ProFormDigit
+              label="Z reconstruction range"
+              name="z_reconstruction_range"
+              min={0}
+              max={4}
+            />
+          )}
+          {currentConfigType === '3D_BI_PLANE' && (
+            <ProFormDigit
+              label="Bi-plane distance"
+              name="bi_plane_distance"
+              min={0}
+              max={4}
+              rules={[{ required: true, message: 'Bi-plane distance is required for Bi-plane' }]}
+            />
+          )}
         </StepsForm.StepForm>
       </StepsForm>
     </Modal>

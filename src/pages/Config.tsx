@@ -202,7 +202,7 @@ const TableList: React.FC = () => {
         // rowKey must be unique for row selection to work properly
         rowKey="config_id"
         // hide search panel
-        // search={false}
+        search={false}
         toolBarRender={() => [
           <Button
             type="primary"
@@ -277,6 +277,7 @@ const TableList: React.FC = () => {
           handleCreateModalOpen(false);
         }}
         modalOpen={createModalOpen}
+        values={{ config_name: 'untitled' }}
         title={intl.formatMessage({
           id: 'pages.configTable.createForm.title',
           defaultMessage: 'New configuration',
