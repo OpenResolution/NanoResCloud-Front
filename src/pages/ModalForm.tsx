@@ -78,7 +78,7 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
           // pass in all values (overkill)
           initialValues={props.values}
           title={intl.formatMessage({
-            id: 'pages.configTable.form.basicInfo',
+            id: 'pages.config.form.basicInfo',
             defaultMessage: 'Basic Information',
           })}
         >
@@ -88,7 +88,7 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
                 required: true,
                 message: (
                   <FormattedMessage
-                    id="pages.configTable.titleName.message"
+                    id="pages.config.column.name.message"
                     defaultMessage="Name is required"
                   />
                 ),
@@ -96,25 +96,37 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
             ]}
             // width="md"
             name="config_name"
-            label="Name"
+            label={intl.formatMessage({
+              id: 'pages.config.fields.name',
+              defaultMessage: 'Name',
+            })}
           />
           <ProFormTextArea
             // width="md"
             name="config_description"
-            label="Description"
+            label={intl.formatMessage({
+              id: 'pages.config.fields.description',
+              defaultMessage: 'Description',
+            })}
           />
           <ProFormSelect
             name="config_type"
-            label="Type"
+            label={intl.formatMessage({
+              id: 'pages.config.fields.type',
+              defaultMessage: 'Type',
+            })}
             valueEnum={ConfigTypeValueEnum}
-            placeholder="Please select a type"
+            placeholder={intl.formatMessage({
+              id: 'pages.config.fields.type.placeholder',
+              defaultMessage: 'Please select a type',
+            })}
             rules={[{ required: true, message: 'Type is required' }]}
           />
         </StepsForm.StepForm>
         <StepsForm.StepForm
           initialValues={props.values}
           title={intl.formatMessage({
-            id: 'pages.configTable.form.parameters',
+            id: 'pages.config.form.parameters',
             defaultMessage: 'Parameters',
           })}
         >

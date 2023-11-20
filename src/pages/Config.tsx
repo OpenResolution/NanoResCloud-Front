@@ -12,51 +12,6 @@ import { ConfigModalForm, ConfigTypeValueEnum } from './ModalForm';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
-const handleCreate = async (fields: API.ConfigFormFields) => {
-  const hide = message.loading('Creating');
-  try {
-    await createConfig({ ...fields });
-    hide();
-    message.success('Created successfully');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Creation failed, please try again!');
-    return false;
-  }
-};
-
-const handleDelete = async (selectedRows: API.ConfigItem[]) => {
-  const hide = message.loading('Deleting');
-  if (!selectedRows) return true;
-  try {
-    await deleteConfigs({
-      config_ids: selectedRows.map((row) => row.config_id),
-    });
-    hide();
-    message.success('Deleted successfully');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Deletion failed, please try again');
-    return false;
-  }
-};
-
-const handleEdit = async (fields: API.ConfigItem) => {
-  const hide = message.loading('Saving edits');
-  try {
-    await editConfig({ ...fields });
-    hide();
-    message.success('Saved edits');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Saving failed, please try again!');
-    return false;
-  }
-};
-
 const TableList: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
@@ -72,6 +27,97 @@ const TableList: React.FC = () => {
 
   const intl = useIntl();
 
+  // put handlers inside the component in order to use intl
+  const handleCreate = async (fields: API.ConfigFormFields) => {
+    const hide = message.loading(
+      intl.formatMessage({
+        id: 'pages.config.creating',
+        defaultMessage: 'Creating',
+      }),
+    );
+    try {
+      await createConfig({ ...fields });
+      hide();
+      message.success(
+        intl.formatMessage({
+          id: 'pages.config.creating.success',
+          defaultMessage: 'Created successfully',
+        }),
+      );
+      return true;
+    } catch (error) {
+      hide();
+      message.error(
+        intl.formatMessage({
+          id: 'pages.config.creating.failed',
+          defaultMessage: 'Creation failed, please try again',
+        }),
+      );
+      return false;
+    }
+  };
+
+  const handleDelete = async (selectedRowsToDelete: API.ConfigItem[]) => {
+    const hide = message.loading(
+      intl.formatMessage({
+        id: 'pages.config.deleting',
+        defaultMessage: 'Deleting',
+      }),
+    );
+    if (!selectedRowsToDelete) return true;
+    try {
+      await deleteConfigs({
+        config_ids: selectedRowsToDelete.map((row) => row.config_id),
+      });
+      hide();
+      message.success(
+        intl.formatMessage({
+          id: 'pages.config.deleting.success',
+          defaultMessage: 'Deleted successfully',
+        }),
+      );
+      return true;
+    } catch (error) {
+      hide();
+      message.error(
+        intl.formatMessage({
+          id: 'pages.config.deleting.failed',
+          defaultMessage: 'Deletion failed, please try again',
+        }),
+      );
+      return false;
+    }
+  };
+
+  const handleEdit = async (fields: API.ConfigItem) => {
+    const hide = message.loading(
+      intl.formatMessage({
+        id: 'pages.config.editing',
+        defaultMessage: 'Saving edits',
+      }),
+    );
+    try {
+      await editConfig({ ...fields });
+      hide();
+      message.success(
+        intl.formatMessage({
+          id: 'pages.config.editing.success',
+          defaultMessage: 'Saved edits',
+        }),
+      );
+      return true;
+    } catch (error) {
+      hide();
+      message.error(
+        intl.formatMessage({
+          id: 'pages.config.editing.failed',
+          defaultMessage: 'Saving failed, please try again',
+        }),
+      );
+      return false;
+    }
+  };
+
   const columns: ProColumns<API.ConfigItem>[] = [
     {
       // used as key, hidden from display
@@ -81,7 +127,7 @@ const TableList: React.FC = () => {
       hideInDescriptions: true,
     },
     {
-      title: <FormattedMessage id="pages.configTable.column.name" defaultMessage="Name" />,
+      title: <FormattedMessage id="pages.config.fields.name" defaultMessage="Name" />,
       dataIndex: 'config_name',
       tip: 'Configuation name',
       render: (dom, entity) => {
@@ -98,28 +144,23 @@ const TableList: React.FC = () => {
       },
     },
     {
-      title: (
-        <FormattedMessage id="pages.configTable.column.description" defaultMessage="Description" />
-      ),
+      title: <FormattedMessage id="pages.config.fields.description" defaultMessage="Description" />,
       dataIndex: 'config_description',
       valueType: 'textarea',
     },
     {
-      title: <FormattedMessage id="pages.configTable.column.type" defaultMessage="Type" />,
+      title: <FormattedMessage id="pages.config.fields.type" defaultMessage="Type" />,
       dataIndex: 'config_type',
       valueEnum: ConfigTypeValueEnum,
     },
     {
-      title: <FormattedMessage id="pages.configTable.column.na" defaultMessage="NA" />,
+      title: <FormattedMessage id="pages.config.fields.na" defaultMessage="NA" />,
       dataIndex: 'na',
       hideInTable: true,
     },
     {
       title: (
-        <FormattedMessage
-          id="pages.configTable.column.subregionSize"
-          defaultMessage="Subregion size"
-        />
+        <FormattedMessage id="pages.config.fields.subregionSize" defaultMessage="Subregion size" />
       ),
       dataIndex: 'subregion_size',
       hideInTable: true,
@@ -127,7 +168,7 @@ const TableList: React.FC = () => {
     {
       title: (
         <FormattedMessage
-          id="pages.configTable.column.zReconstructionRange"
+          id="pages.config.fields.zReconstructionRange"
           defaultMessage="Z reconstruction range"
         />
       ),
@@ -137,7 +178,7 @@ const TableList: React.FC = () => {
     {
       title: (
         <FormattedMessage
-          id="pages.configTable.column.biPlaneDistance"
+          id="pages.config.fields.biPlaneDistance"
           defaultMessage="Bi-plane distance"
         />
       ),
@@ -145,7 +186,7 @@ const TableList: React.FC = () => {
       hideInTable: true,
     },
     {
-      title: <FormattedMessage id="pages.configTable.column.options" defaultMessage="Options" />,
+      title: <FormattedMessage id="pages.config.options" defaultMessage="Options" />,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
@@ -159,7 +200,7 @@ const TableList: React.FC = () => {
             setEditModalOpen(true);
           }}
         >
-          <FormattedMessage id="pages.configTable.edit" defaultMessage="Edit" />
+          <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
         </Button>,
         <Button
           key="delete"
@@ -168,13 +209,22 @@ const TableList: React.FC = () => {
           danger
           onClick={() =>
             Modal.confirm({
-              title: 'Delete Configuration',
-              content: 'Are you sure you want to delete this configuration?',
-              okText: 'Delete',
+              title: intl.formatMessage({
+                id: 'pages.config.singleDelete.title',
+                defaultMessage: 'Delete Configuration',
+              }),
+              content: intl.formatMessage({
+                id: 'pages.config.singleDelete.content',
+                defaultMessage: 'Are you sure you want to delete this configuration?',
+              }),
+              okText: intl.formatMessage({
+                id: 'pages.config.delete',
+                defaultMessage: 'Delete',
+              }),
               okButtonProps: {
                 danger: true,
               },
-              cancelText: 'Cancel',
+              // use default cancelText
               onOk: async () => {
                 // single-entry deletion is a special case of batch deletion
                 await handleDelete([record]);
@@ -189,7 +239,7 @@ const TableList: React.FC = () => {
             })
           }
         >
-          <FormattedMessage id="pages.configTable.delete" defaultMessage="Delete" />
+          <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
         </Button>,
       ],
     },
@@ -222,7 +272,7 @@ const TableList: React.FC = () => {
     <PageContainer>
       <ProTable<API.ConfigItem, API.PageParams>
         headerTitle={intl.formatMessage({
-          id: 'pages.configTable.title',
+          id: 'pages.config.headerTitle',
           defaultMessage: 'All configurations',
         })}
         actionRef={tableActionRef}
@@ -238,7 +288,7 @@ const TableList: React.FC = () => {
               setCreateModalOpen(true);
             }}
           >
-            <PlusOutlined /> <FormattedMessage id="pages.configTable.new" defaultMessage="New" />
+            <PlusOutlined /> <FormattedMessage id="pages.config.create" defaultMessage="New" />
           </Button>,
         ]}
         request={getUserConfigs}
@@ -253,9 +303,9 @@ const TableList: React.FC = () => {
         <FooterToolbar
           extra={
             <div>
-              <FormattedMessage id="pages.configTable.chosen" defaultMessage="Chosen" />{' '}
+              <FormattedMessage id="pages.config.chosen" defaultMessage="Chosen" />{' '}
               <a style={{ fontWeight: 600 }}>{selectedRows.length}</a>{' '}
-              <FormattedMessage id="pages.configTable.items" defaultMessage="items" />
+              <FormattedMessage id="pages.config.items" defaultMessage="items" />
             </div>
           }
         >
@@ -264,13 +314,22 @@ const TableList: React.FC = () => {
             type="primary"
             onClick={() =>
               Modal.confirm({
-                title: 'Delete Configurations',
-                content: 'Are you sure you want to delete selected configurations?',
-                okText: 'Delete',
+                title: intl.formatMessage({
+                  id: 'pages.config.batchDelete.title',
+                  defaultMessage: 'Delete Configurations',
+                }),
+                content: intl.formatMessage({
+                  id: 'pages.config.batchDelete.content',
+                  defaultMessage: 'Are you sure you want to delete selected configurations?',
+                }),
+                okText: intl.formatMessage({
+                  id: 'pages.config.delete',
+                  defaultMessage: 'Delete',
+                }),
                 okButtonProps: {
                   danger: true,
                 },
-                cancelText: 'Cancel',
+                // use default cancelText
                 onOk: async () => {
                   await handleDelete(selectedRows);
                   setSelectedRows([]);
@@ -280,7 +339,7 @@ const TableList: React.FC = () => {
             }
           >
             <FormattedMessage
-              id="pages.configTable.batchDeletion"
+              id="pages.config.batchDelete.button"
               defaultMessage="Batch deletion"
             />
           </Button>
@@ -307,10 +366,15 @@ const TableList: React.FC = () => {
           setCreateModalOpen(false);
         }}
         modalOpen={createModalOpen}
-        values={{ config_name: 'untitled' }}
+        values={{
+          config_name: intl.formatMessage({
+            id: 'pages.config.untitled',
+            defaultMessage: 'untitled config',
+          }),
+        }}
         title={intl.formatMessage({
-          id: 'pages.configTable.createForm.title',
-          defaultMessage: 'New configuration',
+          id: 'pages.config.createForm.title',
+          defaultMessage: 'New Configuration',
         })}
       />
 
@@ -339,8 +403,8 @@ const TableList: React.FC = () => {
         // form doesn't need config_id
         values={(currentRow as API.ConfigFormFields) || {}}
         title={intl.formatMessage({
-          id: 'pages.configTable.editForm.title',
-          defaultMessage: 'Edit configuration',
+          id: 'pages.config.editForm.title',
+          defaultMessage: 'Edit Configuration',
         })}
       />
 
