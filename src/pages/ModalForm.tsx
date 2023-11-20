@@ -36,7 +36,9 @@ export const ConfigTypeValueEnum = {
 
 export const ConfigModalForm: React.FC<FormProps> = (props) => {
   const intl = useIntl();
-  const [currentConfigType, setCurrentConfigType] = useState<API.ConfigType>('2D');
+  const [currentConfigType, setCurrentConfigType] = useState<API.ConfigType>(
+    props.values?.config_type || '2D',
+  );
 
   return (
     // use Modal as outermost layer to utilize its `destroyOnClose` feature

@@ -4,7 +4,7 @@
 declare namespace API {
   type ConfigType = '2D' | '3D_SINGLE_PLANE' | '3D_BI_PLANE';
 
-  type ConfigFormFields = {
+  type ConfigFormFieldsUniversal = {
     // basic info (metadata)
     config_name: string;
     config_description: string;
@@ -13,8 +13,14 @@ declare namespace API {
     // for all types
     na: number;
     subregion_size: number;
+  };
+
+  type ConfigFormFields3D = ConfigFormFieldsUniversal & {
     // 3D only
     z_reconstruction_range: number;
+  };
+
+  type ConfigFormFields = ConfigFormFields3D & {
     // 3D_BI_PLANE only
     bi_plane_distance: number;
   };

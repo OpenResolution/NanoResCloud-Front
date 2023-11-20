@@ -92,8 +92,6 @@ const TableList: React.FC = () => {
 
   const [selectedRows, setSelectedRows] = useState<API.ConfigItem[]>([]);
   const tableActionRef = useRef<ActionType>();
-  // for configuration creation form
-  const formRef = useRef<ProFormInstance>();
 
   const intl = useIntl();
 
@@ -106,7 +104,7 @@ const TableList: React.FC = () => {
       hideInDescriptions: true,
     },
     {
-      title: <FormattedMessage id="pages.configTable.titleName" defaultMessage="Name" />,
+      title: <FormattedMessage id="pages.configTable.column.name" defaultMessage="Name" />,
       dataIndex: 'config_name',
       tip: 'Configuation name',
       render: (dom, entity) => {
@@ -124,24 +122,54 @@ const TableList: React.FC = () => {
     },
     {
       title: (
-        <FormattedMessage id="pages.configTable.titleDescription" defaultMessage="Description" />
+        <FormattedMessage id="pages.configTable.column.description" defaultMessage="Description" />
       ),
       dataIndex: 'config_description',
       valueType: 'textarea',
     },
     {
-      title: <FormattedMessage id="pages.configTable.titleType" defaultMessage="Type" />,
+      title: <FormattedMessage id="pages.configTable.column.type" defaultMessage="Type" />,
       dataIndex: 'config_type',
       valueEnum: ConfigTypeValueEnum,
     },
     {
-      title: <FormattedMessage id="pages.configTable.titleNA" defaultMessage="NA" />,
+      title: <FormattedMessage id="pages.configTable.column.na" defaultMessage="NA" />,
       dataIndex: 'na',
-      sorter: true,
-      hideInForm: true,
+      // sorter: true,
+      hideInTable: true,
     },
     {
-      title: <FormattedMessage id="pages.configTable.titleOptions" defaultMessage="Options" />,
+      title: (
+        <FormattedMessage
+          id="pages.configTable.column.subregionSize"
+          defaultMessage="Subregion size"
+        />
+      ),
+      dataIndex: 'subregion_size',
+      hideInTable: true,
+    },
+    {
+      title: (
+        <FormattedMessage
+          id="pages.configTable.column.zReconstructionRange"
+          defaultMessage="Z reconstruction range"
+        />
+      ),
+      dataIndex: 'z_reconstruction_range',
+      hideInTable: true,
+    },
+    {
+      title: (
+        <FormattedMessage
+          id="pages.configTable.column.biPlaneDistance"
+          defaultMessage="Bi-plane distance"
+        />
+      ),
+      dataIndex: 'bi_plane_distance',
+      hideInTable: true,
+    },
+    {
+      title: <FormattedMessage id="pages.configTable.column.options" defaultMessage="Options" />,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
@@ -190,6 +218,29 @@ const TableList: React.FC = () => {
       ],
     },
   ];
+
+  const fields2D = [
+    'config_name',
+    'config_description',
+    'config_type',
+    'na',
+    'subregion_size',
+    'option',
+  ];
+  const fields3DS = fields2D.concat(['z_reconstruction_range']);
+  const fields3DB = fields3DS.concat(['bi_plane_distance']);
+
+  const typeToColumns = (configType: API.ConfigType): ProColumns<API.ConfigItem>[] => {
+    let fields: string[];
+    if (configType === '2D') {
+      fields = fields2D;
+    } else if (configType === '3D_SINGLE_PLANE') {
+      fields = fields3DS;
+    } else {
+      fields = fields3DB;
+    }
+    return columns.filter((column) => fields.includes(column.dataIndex as string));
+  };
 
   return (
     <PageContainer>
@@ -326,7 +377,9 @@ const TableList: React.FC = () => {
             title={currentRow?.config_name}
             // use local `dataSource` instead of remote `request` for responsiveness
             dataSource={currentRow || {}}
-            columns={columns as ProDescriptionsItemProps<API.ConfigItem>[]}
+            columns={
+              typeToColumns(currentRow.config_type) as ProDescriptionsItemProps<API.ConfigItem>[]
+            }
             actionRef={showDetailsActionRef}
           />
         )}
