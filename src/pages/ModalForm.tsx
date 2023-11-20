@@ -6,7 +6,7 @@ import {
   StepsForm,
 } from '@ant-design/pro-components';
 import { Modal } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
 export type FormValueType = API.ConfigFormFields;
@@ -39,6 +39,12 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
   const [currentConfigType, setCurrentConfigType] = useState<API.ConfigType>(
     props.values?.config_type || '2D',
   );
+
+  // state is only initiated once and doesn't change when props change
+  // therefore need to keep state in sync with props
+  useEffect(() => {
+    setCurrentConfigType(props.values?.config_type || '2D');
+  }, [props.values?.config_type]);
 
   return (
     // use Modal as outermost layer to utilize its `destroyOnClose` feature
