@@ -1,9 +1,9 @@
 import {
+  StepsForm,
   ProFormText,
   ProFormTextArea,
   ProFormSelect,
   ProFormDigit,
-  StepsForm,
 } from '@ant-design/pro-components';
 import { Modal } from 'antd';
 import React, { useState, useEffect } from 'react';
@@ -54,6 +54,7 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
       destroyOnClose
       title={props.title}
       open={props.modalOpen}
+      // hide default footer, because StepsForm already has buttons
       footer={null}
       onCancel={() => {
         props.onCancel();

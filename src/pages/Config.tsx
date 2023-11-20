@@ -1,23 +1,13 @@
 import { getUserConfigs, createConfig, deleteConfigs, editConfig } from '@/services/api/config';
-import { ApiFilled, PlusOutlined } from '@ant-design/icons';
-import type {
-  ActionType,
-  ProColumns,
-  ProDescriptionsItemProps,
-  ProFormInstance,
-} from '@ant-design/pro-components';
+import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
-  ModalForm,
   PageContainer,
-  ProDescriptions,
-  ProFormText,
-  ProFormTextArea,
-  ProFormSelect,
-  ProFormDigit,
   ProTable,
+  ProDescriptions,
 } from '@ant-design/pro-components';
-import { Button, Drawer, Input, message, Modal } from 'antd';
+import { Button, Drawer, message, Modal } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { ConfigModalForm, ConfigTypeValueEnum } from './ModalForm';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
@@ -36,26 +26,6 @@ const handleCreate = async (fields: API.ConfigFormFields) => {
   }
 };
 
-const handleEdit = async (fields: API.ConfigItem) => {
-  const hide = message.loading('Saving edits');
-  try {
-    await editConfig({ ...fields });
-    hide();
-    message.success('Saved edits');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Saving failed, please try again!');
-    return false;
-  }
-};
-
-/**
- * @en-US Delete node
- * @zh-CN 删除节点
- *
- * @param selectedRows
- */
 const handleDelete = async (selectedRows: API.ConfigItem[]) => {
   const hide = message.loading('Deleting');
   if (!selectedRows) return true;
@@ -73,20 +43,27 @@ const handleDelete = async (selectedRows: API.ConfigItem[]) => {
   }
 };
 
-const TableList: React.FC = () => {
-  /**
-   * @en-US Pop-up window of new window
-   * @zh-CN 新建窗口的弹窗
-   *  */
-  const [createModalOpen, handleCreateModalOpen] = useState<boolean>(false);
-  /**
-   * @en-US The pop-up window of the distribution update window
-   * @zh-CN 分布更新窗口的弹窗
-   * */
-  const [editModalOpen, handleEditModalOpen] = useState<boolean>(false);
+const handleEdit = async (fields: API.ConfigItem) => {
+  const hide = message.loading('Saving edits');
+  try {
+    await editConfig({ ...fields });
+    hide();
+    message.success('Saved edits');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('Saving failed, please try again!');
+    return false;
+  }
+};
 
-  // for showDetails drawer
+const TableList: React.FC = () => {
+  const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+
+  // for editModal and showDetails drawer
   const [currentRow, setCurrentRow] = useState<API.ConfigItem>();
+  // for showDetails drawer
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const showDetailsActionRef = useRef<ActionType>();
 
@@ -135,7 +112,6 @@ const TableList: React.FC = () => {
     {
       title: <FormattedMessage id="pages.configTable.column.na" defaultMessage="NA" />,
       dataIndex: 'na',
-      // sorter: true,
       hideInTable: true,
     },
     {
@@ -180,7 +156,7 @@ const TableList: React.FC = () => {
           size="small"
           onClick={() => {
             setCurrentRow(record);
-            handleEditModalOpen(true);
+            setEditModalOpen(true);
           }}
         >
           <FormattedMessage id="pages.configTable.edit" defaultMessage="Edit" />
@@ -259,7 +235,7 @@ const TableList: React.FC = () => {
             type="primary"
             key="primary"
             onClick={() => {
-              handleCreateModalOpen(true);
+              setCreateModalOpen(true);
             }}
           >
             <PlusOutlined /> <FormattedMessage id="pages.configTable.new" defaultMessage="New" />
@@ -312,11 +288,14 @@ const TableList: React.FC = () => {
       )}
 
       <ConfigModalForm
+        /**
+         * Form for creating a config
+         */
         onSubmit={async (value) => {
           // TODO optional fields
           const success = await handleCreate(value as API.ConfigFormFields);
           if (success) {
-            handleCreateModalOpen(false);
+            setCreateModalOpen(false);
             // use optional chaining instead of if clause
             // refresh the table to show the newly created row
             tableActionRef.current?.reload();
@@ -325,7 +304,7 @@ const TableList: React.FC = () => {
           }
         }}
         onCancel={() => {
-          handleCreateModalOpen(false);
+          setCreateModalOpen(false);
         }}
         modalOpen={createModalOpen}
         values={{ config_name: 'untitled' }}
@@ -336,6 +315,9 @@ const TableList: React.FC = () => {
       />
 
       <ConfigModalForm
+        /**
+         * Form for editing a config
+         */
         onSubmit={async (value) => {
           const nextConfig = {
             config_id: (currentRow as API.ConfigItem).config_id,
@@ -343,7 +325,7 @@ const TableList: React.FC = () => {
           };
           const success = await handleEdit(nextConfig);
           if (success) {
-            handleEditModalOpen(false);
+            setEditModalOpen(false);
             tableActionRef.current?.reload();
             // update currentRow and then reload showDetails
             setCurrentRow(nextConfig);
@@ -351,7 +333,7 @@ const TableList: React.FC = () => {
           }
         }}
         onCancel={() => {
-          handleEditModalOpen(false);
+          setEditModalOpen(false);
         }}
         modalOpen={editModalOpen}
         // form doesn't need config_id
@@ -363,6 +345,9 @@ const TableList: React.FC = () => {
       />
 
       <Drawer
+        /**
+         * Drawer that shows the details of a config
+         */
         width={600}
         open={showDetails}
         onClose={() => {
