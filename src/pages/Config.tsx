@@ -7,7 +7,7 @@ import {
   ProDescriptions,
 } from '@ant-design/pro-components';
 import { Button, Drawer, message, Modal } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { ConfigModalForm, ConfigTypeValueEnum } from './ModalForm';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
@@ -189,6 +189,7 @@ const TableList: React.FC = () => {
       title: <FormattedMessage id="pages.config.options" defaultMessage="Options" />,
       dataIndex: 'option',
       valueType: 'option',
+      align: 'center',
       render: (_, record) => [
         <Button
           key="edit"
@@ -200,7 +201,7 @@ const TableList: React.FC = () => {
             setEditModalOpen(true);
           }}
         >
-          <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
+          <EditOutlined /> <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
         </Button>,
         <Button
           key="delete"
@@ -239,7 +240,7 @@ const TableList: React.FC = () => {
             })
           }
         >
-          <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
+          <DeleteOutlined /> <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
         </Button>,
       ],
     },
