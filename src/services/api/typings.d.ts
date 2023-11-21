@@ -10,14 +10,27 @@ declare namespace API {
     config_description: string;
     config_type: ConfigType;
     user_id: string;
-    // for all types
+    // required
     na: number;
+    wave_length: number;
+    refractive_index: number;
+    pixel_size: number;
+    camera_offset: number;
+    camera_gain: number;
+    // optional
     subregion_size: number;
+    segmentation_intensity_threshold: number;
+    segmentation_distance_threshold: number;
+    single_molecule_intensity_rejection_threshold: number;
+    single_molecule_log_likelihood_rejection_threshold: number;
+    single_molecule_localization_precision_rejection_threshold: number;
+    drift_correction: boolean;
   };
 
   type ConfigFormFields3D = ConfigFormFieldsUniversal & {
     // 3D only
     z_reconstruction_range: number;
+    z_psf_library_step_size: number;
   };
 
   type ConfigFormFields = ConfigFormFields3D & {

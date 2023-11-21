@@ -5,6 +5,7 @@ import {
   ProFormSelect,
   ProFormDigit,
 } from '@ant-design/pro-components';
+import type { ProColumns } from '@ant-design/pro-components';
 import { Modal } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
@@ -32,6 +33,64 @@ export const ConfigTypeValueEnum = {
   '3D_BI_PLANE': {
     text: <FormattedMessage id="pages.configTable.titleType.3db" defaultMessage="3D Bi-Plane" />,
   },
+};
+
+const fieldsBasic = ['config_name', 'config_description', 'config_type', 'option'];
+const params2D = [
+  'na',
+  'wave_length',
+  'refractive_index',
+  'pixel_size',
+  'camera_offset',
+  'camera_gain',
+
+  'subregion_size',
+  'segmentation_intensity_threshold',
+  'segmentation_distance_threshold',
+  'single_molecule_intensity_rejection_threshold',
+  'single_molecule_log_likelihood_rejection_threshold',
+  'single_molecule_localization_precision_rejection_threshold',
+  'drift_correction',
+];
+const params3DS = params2D.concat(['z_reconstruction_range', 'z_psf_library_step_size']);
+const params3DB = params3DS.concat(['bi_plane_distance']);
+
+const snakeCaseToCamelCase = (input) =>
+  input
+    .split('_')
+    .reduce(
+      (res, word, i) =>
+        i === 0
+          ? word.toLowerCase()
+          : `${res}${word.charAt(0).toUpperCase()}${word.substr(1).toLowerCase()}`,
+      '',
+    );
+
+export const ParameterColumns = params3DB.map((name) => ({
+  title: (
+    <FormattedMessage
+      id={'pages.config.fields.' + snakeCaseToCamelCase(name)}
+      defaultMessage={name}
+    />
+  ),
+  dataIndex: name,
+  hideInTable: true,
+}));
+
+export const TypeToColumns = (
+  configType: API.ConfigType,
+  columns: ProColumns<API.ConfigItem>[],
+): ProColumns<API.ConfigItem>[] => {
+  let fields: string[];
+  if (configType === '2D') {
+    fields = params2D;
+  } else if (configType === '3D_SINGLE_PLANE') {
+    fields = params3DS;
+  } else {
+    fields = params3DB;
+  }
+  fields = fields.concat(fieldsBasic);
+  return columns.filter((column) => fields.includes(column.dataIndex as string));
 };
 
 export const ConfigModalForm: React.FC<FormProps> = (props) => {

@@ -8,7 +8,7 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Drawer, message, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { ConfigModalForm, ConfigTypeValueEnum } from './ModalForm';
+import { ConfigModalForm, ConfigTypeValueEnum, ParameterColumns, TypeToColumns } from './ModalForm';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
@@ -153,38 +153,7 @@ const TableList: React.FC = () => {
       dataIndex: 'config_type',
       valueEnum: ConfigTypeValueEnum,
     },
-    {
-      title: <FormattedMessage id="pages.config.fields.na" defaultMessage="NA" />,
-      dataIndex: 'na',
-      hideInTable: true,
-    },
-    {
-      title: (
-        <FormattedMessage id="pages.config.fields.subregionSize" defaultMessage="Subregion size" />
-      ),
-      dataIndex: 'subregion_size',
-      hideInTable: true,
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="pages.config.fields.zReconstructionRange"
-          defaultMessage="Z reconstruction range"
-        />
-      ),
-      dataIndex: 'z_reconstruction_range',
-      hideInTable: true,
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="pages.config.fields.biPlaneDistance"
-          defaultMessage="Bi-plane distance"
-        />
-      ),
-      dataIndex: 'bi_plane_distance',
-      hideInTable: true,
-    },
+    ...ParameterColumns,
     {
       title: <FormattedMessage id="pages.config.options" defaultMessage="Options" />,
       dataIndex: 'option',
@@ -245,29 +214,6 @@ const TableList: React.FC = () => {
       ],
     },
   ];
-
-  const fields2D = [
-    'config_name',
-    'config_description',
-    'config_type',
-    'na',
-    'subregion_size',
-    'option',
-  ];
-  const fields3DS = fields2D.concat(['z_reconstruction_range']);
-  const fields3DB = fields3DS.concat(['bi_plane_distance']);
-
-  const typeToColumns = (configType: API.ConfigType): ProColumns<API.ConfigItem>[] => {
-    let fields: string[];
-    if (configType === '2D') {
-      fields = fields2D;
-    } else if (configType === '3D_SINGLE_PLANE') {
-      fields = fields3DS;
-    } else {
-      fields = fields3DB;
-    }
-    return columns.filter((column) => fields.includes(column.dataIndex as string));
-  };
 
   return (
     <PageContainer>
@@ -423,12 +369,16 @@ const TableList: React.FC = () => {
       >
         {currentRow?.config_name && (
           <ProDescriptions<API.ConfigItem>
-            column={2}
+            // use single column because some field names are very long
+            column={1}
             title={currentRow?.config_name}
             // use local `dataSource` instead of remote `request` for responsiveness
             dataSource={currentRow || {}}
             columns={
-              typeToColumns(currentRow.config_type) as ProDescriptionsItemProps<API.ConfigItem>[]
+              TypeToColumns(
+                currentRow.config_type,
+                columns,
+              ) as ProDescriptionsItemProps<API.ConfigItem>[]
             }
             actionRef={showDetailsActionRef}
           />
