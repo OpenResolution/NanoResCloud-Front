@@ -35,25 +35,98 @@ export const ConfigTypeValueEnum = {
   },
 };
 
-const fieldsBasic = ['config_name', 'config_description', 'config_type', 'option'];
-const params2D = [
-  'na',
-  'wave_length',
-  'refractive_index',
-  'pixel_size',
-  'camera_offset',
-  'camera_gain',
+const EnableValueEnum = {
+  false: {
+    text: <FormattedMessage id="pages.config.disabled" defaultMessage="Disabled" />,
+    status: 'Default',
+  },
+  true: {
+    text: <FormattedMessage id="pages.config.enabled" defaultMessage="Enabled" />,
+    status: 'Success',
+  },
+};
 
-  'subregion_size',
-  'segmentation_intensity_threshold',
-  'segmentation_distance_threshold',
-  'single_molecule_intensity_rejection_threshold',
-  'single_molecule_log_likelihood_rejection_threshold',
-  'single_molecule_localization_precision_rejection_threshold',
-  'drift_correction',
+type Parameter = {
+  name: string;
+  required: boolean;
+  min?: number;
+  max?: number;
+  label?: string;
+};
+
+const params2D: Parameter[] = [
+  { name: 'na', required: true, min: 0.5, max: 1.5, label: 'NA' },
+  { name: 'wave_length', required: true, min: 0.4, max: 1.2, label: 'Wavelength' },
+  { name: 'refractive_index', required: true, min: 1, max: 1.6, label: 'Refractive index' },
+  { name: 'pixel_size', required: true, min: 0.05, max: 1, label: 'Pixel size' },
+  { name: 'camera_offset', required: true, min: 0, max: 1000, label: 'Camera offset' },
+  { name: 'camera_gain', required: true, min: 0.1, max: 100, label: 'Camera gain' },
+  { name: 'subregion_size', required: false, min: 3, max: 40, label: 'Subregion size' },
+  {
+    name: 'segmentation_intensity_threshold',
+    required: false,
+    min: 0,
+    max: 200,
+    label: 'Segmentation intensity threshold',
+  },
+  {
+    name: 'segmentation_distance_threshold',
+    required: false,
+    min: 0,
+    max: 20,
+    label: 'Segmentation distance threshold',
+  },
+  {
+    name: 'single_molecule_intensity_rejection_threshold',
+    required: false,
+    min: 0,
+    max: 1000,
+    label: 'Single-molecule intensity rejection threshold',
+  },
+  {
+    name: 'single_molecule_log_likelihood_rejection_threshold',
+    required: false,
+    min: 0,
+    max: 2000,
+    label: 'Single-molecule log-likelihood rejection threshold',
+  },
+  {
+    name: 'single_molecule_localization_precision_rejection_threshold',
+    required: false,
+    min: 0,
+    max: 0.05,
+    label: 'Single-molecule localization precision rejection threshold',
+  },
+  {
+    name: 'drift_correction',
+    required: false,
+    label: 'Drift correction',
+  },
 ];
-const params3DS = params2D.concat(['z_reconstruction_range', 'z_psf_library_step_size']);
-const params3DB = params3DS.concat(['bi_plane_distance']);
+
+const params3Donly: Parameter[] = [
+  {
+    name: 'z_reconstruction_range',
+    required: false,
+    min: 0,
+    max: 4,
+    label: 'Z reconstruction range',
+  },
+  {
+    name: 'z_psf_library_step_size',
+    required: false,
+    min: 0,
+    max: 0.2,
+    label: 'Z-PSF library step size',
+  },
+];
+
+const params3DBonly: Parameter[] = [
+  { name: 'bi_plane_distance', required: true, min: 0.05, max: 1, label: 'Bi-plane distance' },
+];
+const params3DS = params2D.concat(params3Donly);
+const params3DB = params3DS.concat(params3DBonly);
+const fieldsBasic = ['config_name', 'config_description', 'config_type', 'option'];
 
 const snakeCaseToCamelCase = (input) =>
   input
@@ -66,29 +139,67 @@ const snakeCaseToCamelCase = (input) =>
       '',
     );
 
-export const ParameterColumns = params3DB.map((name) => ({
+const paramToFormField = (param: Parameter) => {
+  if (param.name === 'drift_correction') {
+    return (
+      <ProFormSelect
+        name={param.name}
+        label={
+          <FormattedMessage
+            id={'pages.config.fields.' + snakeCaseToCamelCase(param.name)}
+            defaultMessage={param.label || param.name}
+          />
+        }
+        valueEnum={EnableValueEnum}
+      />
+    );
+  } else {
+    return (
+      <ProFormDigit
+        label={
+          <FormattedMessage
+            id={'pages.config.fields.' + snakeCaseToCamelCase(param.name)}
+            defaultMessage={param.label || param.name}
+          />
+        }
+        name={param.name}
+        min={param.min}
+        max={param.max}
+        rules={
+          param.required
+            ? [{ required: true, message: `${param.label || param.name} is required` }]
+            : undefined
+        }
+      />
+    );
+  }
+};
+
+export const ParameterColumns = params3DB.map(({ name, label }) => ({
   title: (
     <FormattedMessage
       id={'pages.config.fields.' + snakeCaseToCamelCase(name)}
-      defaultMessage={name}
+      defaultMessage={label || name}
     />
   ),
   dataIndex: name,
   hideInTable: true,
+  valueEnum: name === 'drift_correction' ? EnableValueEnum : undefined,
 }));
 
 export const TypeToColumns = (
   configType: API.ConfigType,
   columns: ProColumns<API.ConfigItem>[],
 ): ProColumns<API.ConfigItem>[] => {
-  let fields: string[];
+  let params: Parameter[];
   if (configType === '2D') {
-    fields = params2D;
+    params = params2D;
   } else if (configType === '3D_SINGLE_PLANE') {
-    fields = params3DS;
+    params = params3DS;
   } else {
-    fields = params3DB;
+    params = params3DB;
   }
+  let fields = params.map(({ name }) => name);
   fields = fields.concat(fieldsBasic);
   return columns.filter((column) => fields.includes(column.dataIndex as string));
 };
@@ -189,31 +300,10 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
             defaultMessage: 'Parameters',
           })}
         >
-          <ProFormDigit
-            label="NA"
-            name="na"
-            min={0.5}
-            max={1.5}
-            rules={[{ required: true, message: 'NA is required' }]}
-          />
-          <ProFormDigit label="Subregion size" name="subregion_size" min={3} max={40} />
-          {['3D_SINGLE_PLANE', '3D_BI_PLANE'].includes(currentConfigType) && (
-            <ProFormDigit
-              label="Z reconstruction range"
-              name="z_reconstruction_range"
-              min={0}
-              max={4}
-            />
-          )}
-          {currentConfigType === '3D_BI_PLANE' && (
-            <ProFormDigit
-              label="Bi-plane distance"
-              name="bi_plane_distance"
-              min={0}
-              max={4}
-              rules={[{ required: true, message: 'Bi-plane distance is required for Bi-plane' }]}
-            />
-          )}
+          {params2D.map(paramToFormField)}
+          {['3D_SINGLE_PLANE', '3D_BI_PLANE'].includes(currentConfigType) &&
+            params3Donly.map(paramToFormField)}
+          {currentConfigType === '3D_BI_PLANE' && params3DBonly.map(paramToFormField)}
         </StepsForm.StepForm>
       </StepsForm>
     </Modal>
