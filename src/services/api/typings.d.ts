@@ -17,6 +17,7 @@ declare namespace API {
     pixel_size: number;
     camera_offset: number;
     camera_gain: number;
+    drift_correction: boolean;
     // optional
     subregion_size: number;
     segmentation_intensity_threshold: number;
@@ -24,7 +25,6 @@ declare namespace API {
     single_molecule_intensity_rejection_threshold: number;
     single_molecule_log_likelihood_rejection_threshold: number;
     single_molecule_localization_precision_rejection_threshold: number;
-    drift_correction: boolean;
   };
 
   type ConfigFormFields3D = ConfigFormFieldsUniversal & {
