@@ -1,4 +1,9 @@
-import { getUserConfigs, createConfig, deleteConfigs, editConfig } from '@/services/api/config';
+import {
+  getUserConfigs,
+  deleteConfigs,
+  createConfig,
+  editConfig,
+} from '@/services/nanores-cloud/config';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
@@ -36,7 +41,7 @@ const TableList: React.FC = () => {
       }),
     );
     try {
-      await createConfig({ ...fields });
+      await createConfig({ form_fields: fields });
       hide();
       message.success(
         intl.formatMessage({

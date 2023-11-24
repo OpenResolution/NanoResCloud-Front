@@ -1,6 +1,6 @@
 import Footer from '@/components/Footer';
-import { login } from '@/services/api/api';
-import { getFakeCaptcha } from '@/services/api/login';
+import { login } from '@/services/nanores-cloud/login';
+import { getFakeCaptcha } from '@/services/nanores-cloud/login';
 import {
   AlipayCircleOutlined,
   LockOutlined,

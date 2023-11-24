@@ -1,4 +1,4 @@
-import { outLogin } from '@/services/api/api';
+import { outLogin } from '@/services/nanores-cloud/login';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Menu, Spin } from 'antd';
 import type { ItemType } from 'antd/lib/menu/hooks/useItems';
@@ -32,6 +32,9 @@ const loginOut = async () => {
 };
 
 const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
+  // don't call React Hook "useIntl" conditionally.
+  const intl = useIntl();
+
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const onMenuClick = useCallback(
@@ -68,8 +71,6 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
   if (!currentUser || !currentUser.name) {
     return loading;
   }
-
-  const intl = useIntl();
 
   const menuItems: ItemType[] = [
     ...(menu
