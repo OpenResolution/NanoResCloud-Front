@@ -63,7 +63,7 @@ export default {
   'pages.searchTable.item': 'item',
   'pages.searchTable.totalServiceCalls': 'Total Number of Service Calls',
   'pages.searchTable.tenThousand': '0000',
-  'pages.searchTable.batchDeletion': 'bacth deletion',
+  'pages.searchTable.batchDeletion': 'batch deletion',
   'pages.searchTable.batchApproval': 'batch approval',
   'pages.returnToHome': 'Return to Home',
   'pages.404.subTitle': 'Sorry, the page you visited does not exist.',

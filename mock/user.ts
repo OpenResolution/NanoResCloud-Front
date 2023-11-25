@@ -36,7 +36,7 @@ export default {
           isLogin: false,
         },
         errorCode: '401',
-        errorMessage: 'Please login!',
+        errorMessage: '请先登录！',
         success: true,
       });
       return;

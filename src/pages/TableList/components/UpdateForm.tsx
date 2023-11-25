@@ -6,9 +6,9 @@ import {
   ProFormTextArea,
   StepsForm,
 } from '@ant-design/pro-components';
+import { FormattedMessage, useIntl } from '@umijs/max';
 import { Modal } from 'antd';
 import React from 'react';
-import { FormattedMessage, useIntl } from 'umi';
 
 export type FormValueType = {
   target?: string;
@@ -21,7 +21,7 @@ export type FormValueType = {
 export type UpdateFormProps = {
   onCancel: (flag?: boolean, formVals?: FormValueType) => void;
   onSubmit: (values: FormValueType) => Promise<void>;
-  updateModalVisible: boolean;
+  updateModalOpen: boolean;
   values: Partial<API.RuleListItem>;
 };
 
@@ -42,7 +42,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               id: 'pages.searchTable.updateForm.ruleConfig',
               defaultMessage: '规则配置',
             })}
-            visible={props.updateModalVisible}
+            open={props.updateModalOpen}
             footer={submitter}
             onCancel={() => {
               props.onCancel();
