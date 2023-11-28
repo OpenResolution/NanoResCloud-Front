@@ -23,12 +23,6 @@
           font-size: 1.1rem;
         }
 
-        .loading-sub-title {
-          margin-top: 20px;
-          font-size: 1rem;
-          color: #888;
-        }
-
         .page-loading-warp {
           display: flex;
           align-items: center;
@@ -180,6 +174,7 @@
         height: 100%;
         min-height: 362px;
       ">
+        <img src="../logo.png" alt="logo" width="256" />
         <div class="page-loading-warp">
           <div class="ant-spin ant-spin-lg ant-spin-spinning">
             <span class="ant-spin-dot ant-spin-dot-spin">
@@ -191,10 +186,7 @@
           </div>
         </div>
         <div class="loading-title">
-          正在加载资源
-        </div>
-        <div class="loading-sub-title">
-          初次加载资源可能需要较多时间 请耐心等待
+          NanoRes LLC
         </div>
       </div>
     `;
