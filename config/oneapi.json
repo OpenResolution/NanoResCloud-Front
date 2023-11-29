@@ -896,7 +896,7 @@
       "LoginParams": {
         "type": "object",
         "properties": {
-          "username": {
+          "email": {
             "type": "string"
           },
           "password": {
