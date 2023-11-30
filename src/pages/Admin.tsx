@@ -1,13 +1,13 @@
 import { HeartTwoTone, SmileTwoTone } from '@ant-design/icons';
-import { PageHeaderWrapper } from '@ant-design/pro-components';
+import { PageContainer } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Alert, Card, Typography } from 'antd';
 import React from 'react';
-import { useIntl } from 'umi';
 
 const Admin: React.FC = () => {
   const intl = useIntl();
   return (
-    <PageHeaderWrapper
+    <PageContainer
       content={intl.formatMessage({
         id: 'pages.admin.subPage.title',
         defaultMessage: 'This page can only be viewed by admin',
@@ -38,7 +38,7 @@ const Admin: React.FC = () => {
         </a>
         。
       </p>
-    </PageHeaderWrapper>
+    </PageContainer>
   );
 };
 

@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Ant Design Pro",
+    "title": "NanoRes Cloud",
     "version": "1.0.0"
   },
   "servers": [
@@ -13,6 +13,206 @@
     }
   ],
   "paths": {
+    "/api/task": {
+      "get": {
+        "tags": ["task"],
+        "description": "Get user tasks",
+        "operationId": "getUserTasks",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "User id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-swagger-router-controller": "api"
+    },
+    "/api/config": {
+      "get": {
+        "tags": ["config"],
+        "description": "Get user configs",
+        "operationId": "getUserConfigs",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "description": "Current page",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Page size",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["config"],
+        "description": "Delete configs",
+        "operationId": "deleteConfigs",
+        "parameters": [
+          {
+            "name": "config_ids",
+            "in": "query",
+            "description": "Ids of the configs to be deleted",
+            "schema": {
+              "type": "array",
+              "items": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["config"],
+        "description": "Create a new config",
+        "operationId": "createConfig",
+        "parameters": [
+          {
+            "name": "form_fields",
+            "in": "query",
+            "description": "Form fields",
+            "schema": {
+              "$ref": "#/components/schemas/ConfigFormFields"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["config"],
+        "description": "Edit a config",
+        "operationId": "editConfig",
+        "parameters": [
+          {
+            "name": "form_fields",
+            "in": "query",
+            "description": "Form fields",
+            "schema": {
+              "$ref": "#/components/schemas/ConfigFormFields"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "x-swagger-router-controller": "api"
+    },
     "/api/currentUser": {
       "get": {
         "tags": ["api"],
@@ -143,26 +343,6 @@
         "x-codegen-request-body-name": "body"
       },
       "x-swagger-router-controller": "api"
-    },
-    "/api/notices": {
-      "summary": "getNotices",
-      "description": "NoticeIconItem",
-      "get": {
-        "tags": ["api"],
-        "operationId": "getNotices",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NoticeIconList"
-                }
-              }
-            }
-          }
-        }
-      }
     },
     "/api/rule": {
       "get": {
@@ -299,6 +479,230 @@
   },
   "components": {
     "schemas": {
+      "ConfigType": {
+        "title": "ConfigType",
+        "description": "Configuration Type",
+        "type": "string",
+        "enum": ["2D", "3D_SINGLE_PLANE", "3D_BI_PLANE"]
+      },
+      "ConfigFormFields": {
+        "type": "object",
+        "required": [
+          "config_name",
+          "config_description",
+          "config_type",
+          "user_id",
+          "na",
+          "wave_length",
+          "refractive_index",
+          "pixel_size",
+          "camera_offset",
+          "camera_gain",
+          "drift_correction"
+        ],
+        "properties": {
+          "config_name": {
+            "type": "string"
+          },
+          "config_description": {
+            "type": "string"
+          },
+          "config_type": {
+            "extensions": {
+              "x-is-enum": true
+            },
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "na": {
+            "type": "number",
+            "format": "float"
+          },
+          "wave_length": {
+            "type": "number",
+            "format": "float"
+          },
+          "refractive_index": {
+            "type": "number",
+            "format": "float"
+          },
+          "pixel_size": {
+            "type": "number",
+            "format": "float"
+          },
+          "camera_offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "camera_gain": {
+            "type": "number",
+            "format": "float"
+          },
+          "drift_correction": {
+            "type": "boolean"
+          },
+          "subregion_size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "segmentation_intensity_threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "segmentation_distance_threshold": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "single_molecule_intensity_rejection_threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "single_molecule_log_likelihood_rejection_threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "single_molecule_localization_precision_rejection_threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "z_reconstruction_range": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "z_psf_library_step_size": {
+            "type": "number",
+            "format": "float"
+          },
+          "bi_plane_distance": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "ConfigItem": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ConfigFormFields" },
+          {
+            "type": "object",
+            "required": ["config_id"],
+            "properties": {
+              "config_id": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ConfigList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TaskType": {
+        "title": "TaskType",
+        "description": "Task Type",
+        "type": "string",
+        "enum": ["2D", "3D_SINGLE_PLANE", "3D_BI_PLANE"]
+      },
+      "TaskStatus": {
+        "title": "TaskStatus",
+        "description": "Task Status",
+        "type": "string",
+        "enum": ["WAITING", "PROCESSING", "SUCCESS", "FAILED"]
+      },
+      "TaskItem": {
+        "type": "object",
+        "required": [
+          "task_id",
+          "task_name",
+          "task_description",
+          "task_type",
+          "user_id",
+          "input_file_id",
+          "output_file_path",
+          "task_config_id",
+          "total_cycles",
+          "current_cycle",
+          "task_status"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "task_description": {
+            "type": "string"
+          },
+          "task_type": {
+            "extensions": {
+              "x-is-enum": true
+            },
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "input_file_id": {
+            "type": "string"
+          },
+          "output_file_path": {
+            "type": "string"
+          },
+          "task_config_id": {
+            "type": "string"
+          },
+          "total_cycles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "current_cycle": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "task_status": {
+            "extensions": {
+              "x-is-enum": true
+            },
+            "$ref": "#/components/schemas/TaskStatus"
+          }
+        }
+      },
+      "TaskList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of task",
+            "format": "int32"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
       "CurrentUser": {
         "type": "object",
         "properties": {
@@ -492,7 +896,7 @@
       "LoginParams": {
         "type": "object",
         "properties": {
-          "username": {
+          "email": {
             "type": "string"
           },
           "password": {
@@ -521,70 +925,6 @@
           "success": {
             "type": "boolean",
             "description": "业务上的请求是否成功"
-          }
-        }
-      },
-      "NoticeIconList": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NoticeIconItem"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "description": "列表的内容总数",
-            "format": "int32"
-          },
-          "success": {
-            "type": "boolean"
-          }
-        }
-      },
-      "NoticeIconItemType": {
-        "title": "NoticeIconItemType",
-        "description": "已读未读列表的枚举",
-        "type": "string",
-        "properties": {},
-        "enum": ["notification", "message", "event"]
-      },
-      "NoticeIconItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "extra": {
-            "type": "string",
-            "format": "any"
-          },
-          "key": { "type": "string" },
-          "read": {
-            "type": "boolean"
-          },
-          "avatar": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "datetime": {
-            "type": "string",
-            "format": "date"
-          },
-          "description": {
-            "type": "string"
-          },
-          "type": {
-            "extensions": {
-              "x-is-enum": true
-            },
-            "$ref": "#/components/schemas/NoticeIconItemType"
           }
         }
       }

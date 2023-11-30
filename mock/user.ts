@@ -36,7 +36,7 @@ export default {
           isLogin: false,
         },
         errorCode: '401',
-        errorMessage: 'Please login!',
+        errorMessage: '请先登录！',
         success: true,
       });
       return;
@@ -118,9 +118,9 @@ export default {
     },
   ],
   'POST /api/login/account': async (req: Request, res: Response) => {
-    const { password, username, type } = req.body;
+    const { email, password, type } = req.body;
     await waitTime(2000);
-    if (password === 'ant.design' && username === 'admin') {
+    if (password === 'ant.design' && email === 'admin@example.com') {
       res.send({
         status: 'ok',
         type,
@@ -129,7 +129,7 @@ export default {
       access = 'admin';
       return;
     }
-    if (password === 'ant.design' && username === 'user') {
+    if (password === 'ant.design' && email === 'user@example.com') {
       res.send({
         status: 'ok',
         type,
@@ -138,16 +138,6 @@ export default {
       access = 'user';
       return;
     }
-    if (type === 'mobile') {
-      res.send({
-        status: 'ok',
-        type,
-        currentAuthority: 'admin',
-      });
-      access = 'admin';
-      return;
-    }
-
     res.send({
       status: 'error',
       type,

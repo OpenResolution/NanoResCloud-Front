@@ -40,7 +40,6 @@ export default {
   'menu.exception.not-find': '404',
   'menu.exception.server-error': '500',
   'menu.exception.trigger': 'Trigger',
-  'menu.account': 'Account',
   'menu.account.center': 'Account Center',
   'menu.account.settings': 'Account Settings',
   'menu.account.trigger': 'Trigger Error',
@@ -49,4 +48,8 @@ export default {
   'menu.editor.flow': 'Flow Editor',
   'menu.editor.mind': 'Mind Editor',
   'menu.editor.koni': 'Koni Editor',
+  'menu.task': 'Tasks',
+  'menu.file': 'Files',
+  'menu.config': 'Configurations',
+  'menu.account': 'Account',
 };
