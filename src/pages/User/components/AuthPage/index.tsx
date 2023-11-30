@@ -2,16 +2,18 @@ import { Footer } from '@/components';
 import { LoginForm } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { Helmet, SelectLang, useIntl } from '@umijs/max';
-import { Alert } from 'antd';
+import { Alert, Divider } from 'antd';
 import React from 'react';
 import Settings from '../../../../../config/defaultSettings';
 
 type LoginFormProps = React.ComponentProps<typeof LoginForm>;
 
 // inherits LoginFormProps and use Omit to avoid duplicating key names
-interface AuthPageProps extends Omit<LoginFormProps, 'childrenOfLoginForm' | 'title'> {
+interface AuthPageProps extends Omit<LoginFormProps, 'children' | 'title' | 'actionLinks'> {
   children?: React.ReactNode;
   title: string;
+  // section under submit button
+  actionLinks: React.ReactNode;
 }
 
 export const ErrorMessage: React.FC<{
@@ -54,7 +56,12 @@ const Lang = () => {
 /**
  * Authentication page, a layout used for both login and register
  */
-export function AuthPage({ children, title, ...restProps }: AuthPageProps): React.ReactNode {
+export function AuthPage({
+  children,
+  title,
+  actionLinks,
+  ...restProps
+}: AuthPageProps): React.ReactNode {
   const containerClassName = useEmotionCss(() => {
     return {
       display: 'flex',
@@ -92,6 +99,28 @@ export function AuthPage({ children, title, ...restProps }: AuthPageProps): Reac
           title="NanoRes Cloud"
           subTitle={intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
           // pass on the rest of the props
+          actions={
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+              }}
+            >
+              <Divider plain>
+                <span
+                  style={{
+                    fontWeight: 'normal',
+                    fontSize: 14,
+                  }}
+                >
+                  {intl.formatMessage({ id: 'pages.authPage.or', defaultMessage: 'OR' })}
+                </span>
+              </Divider>
+              {actionLinks}
+            </div>
+          }
           {...restProps}
         >
           {children}

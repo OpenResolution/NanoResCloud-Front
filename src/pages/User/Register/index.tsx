@@ -1,17 +1,20 @@
 import { LockOutlined, MailOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
 import { ProFormCaptcha, ProFormDependency, ProFormText } from '@ant-design/pro-components';
 import { FormattedMessage, Link, useIntl } from '@umijs/max';
-import { Button, Divider, Tabs } from 'antd';
+import { Button, Tabs } from 'antd';
 import React from 'react';
 import { AuthPage } from '../components/AuthPage';
 
 const Register: React.FC = () => {
+  const intl = useIntl();
+
   const passwordPattern =
     /^(?![A-z0-9]+$)(?=.[^%&',;=?$\x22])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,20}$/;
-  const passwordPatternMessage =
-    'Password should contain 8-20 characters and include uppercase and lowercase letters, numbers, and special symbols.';
-
-  const intl = useIntl();
+  const passwordPatternMessage = intl.formatMessage({
+    id: 'pages.register.password.invalid',
+    defaultMessage:
+      'Password should contain 8-20 characters and include uppercase and lowercase letters, numbers, and special symbols.',
+  });
 
   return (
     <AuthPage
@@ -19,27 +22,13 @@ const Register: React.FC = () => {
         id: 'menu.register',
         defaultMessage: 'Register',
       })}
-      actions={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-          }}
-        >
-          <Divider plain>
-            <span
-              style={{
-                fontWeight: 'normal',
-                fontSize: 14,
-              }}
-            >
-              OR
-            </span>
-          </Divider>
-          <Link to="/user/login">Login Now</Link>
-        </div>
+      actionLinks={
+        <Link to="/user/login">
+          {intl.formatMessage({
+            id: 'pages.register.login',
+            defaultMessage: 'Login Now',
+          })}
+        </Link>
       }
       submitter={{
         // replace the default login button with custom (register) button
@@ -48,7 +37,10 @@ const Register: React.FC = () => {
           return [
             // "block" attribute of Button makes the button match its parent's width
             <Button type="primary" key="submit" onClick={() => props.form?.submit?.()} block>
-              Register
+              {intl.formatMessage({
+                id: 'pages.register.submit',
+                defaultMessage: 'Register',
+              })}
             </Button>,
           ];
         },
@@ -61,14 +53,14 @@ const Register: React.FC = () => {
           {
             key: 'account',
             label: intl.formatMessage({
-              id: 'pages.register.accountRegister.tab',
+              id: 'pages.register.tab',
               defaultMessage: 'Register',
             }),
           },
         ]}
       />
       <ProFormText
-        name="username"
+        name="Username"
         fieldProps={{
           size: 'large',
           prefix: <UserOutlined />,
@@ -109,6 +101,13 @@ const Register: React.FC = () => {
               />
             ),
           },
+          {
+            type: 'email',
+            message: intl.formatMessage({
+              id: 'pages.register.email.invalid',
+              defaultMessage: 'Please enter a valid email address!',
+            }),
+          },
         ]}
       />
       <ProFormCaptcha
@@ -127,13 +126,13 @@ const Register: React.FC = () => {
         captchaTextRender={(timing, count) => {
           if (timing) {
             return `${intl.formatMessage({
-              id: 'pages.register.resend',
+              id: 'pages.register.verificationCode.resend',
               defaultMessage: 'Resend',
             })} (${count}s)`;
           }
           return intl.formatMessage({
             id: 'pages.register.verificationCode.get',
-            defaultMessage: 'Get Code',
+            defaultMessage: 'Get code',
           });
         }}
         name="verification_code"
@@ -181,9 +180,18 @@ const Register: React.FC = () => {
               size: 'large',
               prefix: <LockOutlined />,
             }}
-            placeholder="Confirm password"
+            placeholder={intl.formatMessage({
+              id: 'pages.register.confirmPassword.placeholder',
+              defaultMessage: 'Confirm Password',
+            })}
             rules={[
-              { required: true },
+              {
+                required: true,
+                message: intl.formatMessage({
+                  id: 'pages.register.confirmPassword.required',
+                  defaultMessage: 'Please enter password again!',
+                }),
+              },
               {
                 // check whether two passwords match
                 validator: (rule, value) =>
@@ -191,7 +199,14 @@ const Register: React.FC = () => {
                     if (password === value) {
                       resolve();
                     } else {
-                      reject(new Error('Passwords do not match!'));
+                      reject(
+                        new Error(
+                          intl.formatMessage({
+                            id: 'pages.register.confirmPassword.invalid',
+                            defaultMessage: 'Passwords do not match!',
+                          }),
+                        ),
+                      );
                     }
                   }),
               },

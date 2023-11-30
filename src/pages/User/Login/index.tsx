@@ -2,7 +2,7 @@ import { login } from '@/services/nanores-cloud/login';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
 import { FormattedMessage, Link, history, useIntl, useModel } from '@umijs/max';
-import { Divider, Tabs, message } from 'antd';
+import { Tabs, message } from 'antd';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 import { AuthPage, ErrorMessage } from '../components/AuthPage';
@@ -62,35 +62,13 @@ const Login: React.FC = () => {
       initialValues={{
         autoLogin: true,
       }}
-      actions={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-          }}
-        >
-          <Divider plain>
-            <span
-              style={{
-                fontWeight: 'normal',
-                fontSize: 14,
-              }}
-            >
-              {intl.formatMessage({
-                id: 'pages.login.or',
-                defaultMessage: 'OR',
-              })}
-            </span>
-          </Divider>
-          <Link to="/user/register">
-            {intl.formatMessage({
-              id: 'pages.login.register',
-              defaultMessage: 'Register Now',
-            })}
-          </Link>
-        </div>
+      actionLinks={
+        <Link to="/user/register">
+          {intl.formatMessage({
+            id: 'pages.login.register',
+            defaultMessage: 'Register Now',
+          })}
+        </Link>
       }
       onFinish={async (values) => {
         await handleSubmit(values as API.LoginParams);
