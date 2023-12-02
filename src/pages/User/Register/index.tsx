@@ -1,7 +1,8 @@
+import { register, registerEmailVerification } from '@/services/backend/oauth';
 import { LockOutlined, MailOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
 import { ProFormCaptcha, ProFormDependency, ProFormText } from '@ant-design/pro-components';
-import { FormattedMessage, Link, useIntl } from '@umijs/max';
-import { Button, Tabs } from 'antd';
+import { FormattedMessage, Link, history, useIntl } from '@umijs/max';
+import { Button, Tabs, message } from 'antd';
 import React from 'react';
 import { AuthPage } from '../components/AuthPage';
 
@@ -15,6 +16,51 @@ const Register: React.FC = () => {
     defaultMessage:
       'Password should contain 8-20 characters and include uppercase and lowercase letters, numbers, and special symbols.',
   });
+
+  const handleGetVerificationCode = async (email: string) => {
+    try {
+      // use shorthand syntax for object property
+      const response = await registerEmailVerification({ email } as API.UserRegisEmailSendSchema);
+      console.log(response);
+      message.success(
+        intl.formatMessage({
+          id: 'pages.register.verificationCode.send.success',
+          defaultMessage: `Verification code sent to`,
+        }) +
+          ' ' +
+          email,
+      );
+    } catch (error) {
+      message.error(
+        intl.formatMessage({
+          id: 'pages.register.verificationCode.send.failure',
+          defaultMessage: 'Failed to send verification code',
+        }),
+      );
+    }
+  };
+
+  const handleSubmit = async (values: API.UserRegistrationSchema) => {
+    try {
+      const response = await register(values);
+      if (response.status_code === 200) {
+        message.success(
+          intl.formatMessage({
+            id: 'pages.register.success',
+            defaultMessage: 'Registration successful!',
+          }),
+        );
+        history.push('/user/login');
+      }
+    } catch (error) {
+      message.error(
+        intl.formatMessage({
+          id: 'pages.register.failure',
+          defaultMessage: 'Registration failed, please try again!',
+        }),
+      );
+    }
+  };
 
   return (
     <AuthPage
@@ -45,6 +91,9 @@ const Register: React.FC = () => {
           ];
         },
       }}
+      onFinish={async (values) => {
+        await handleSubmit(values as API.UserRegistrationSchema);
+      }}
     >
       <Tabs
         activeKey={'account'}
@@ -60,7 +109,7 @@ const Register: React.FC = () => {
         ]}
       />
       <ProFormText
-        name="Username"
+        name="username"
         fieldProps={{
           size: 'large',
           prefix: <UserOutlined />,
@@ -147,7 +196,7 @@ const Register: React.FC = () => {
             ),
           },
         ]}
-        onGetCaptcha={async (verificationCode) => {}} // eslint-disable-line
+        onGetCaptcha={handleGetVerificationCode}
       />
       <ProFormText.Password
         name="password"
@@ -175,7 +224,8 @@ const Register: React.FC = () => {
       <ProFormDependency name={['password']}>
         {({ password }) => (
           <ProFormText.Password
-            name="confirm_password"
+            // set name as undefined in order to exclude this field in submission
+            name={undefined}
             fieldProps={{
               size: 'large',
               prefix: <LockOutlined />,

@@ -1,11 +1,7 @@
-import { PageContainer } from '@ant-design/pro-components';
-import { Alert, Card, Typography, Avatar, Row, Col, Progress } from 'antd';
-import React, { useState, useEffect } from 'react';
-import { FormattedMessage, useIntl } from 'umi';
-import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
 import { getUserTasks } from '@/services/nanores-cloud/task';
-import styles from './Task.less';
-import { divide } from 'lodash';
+import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
+import { Card, Col, Progress, Row } from 'antd';
+import React, { useEffect, useState } from 'react';
 
 const { Meta } = Card;
 
@@ -27,7 +23,7 @@ const Task: React.FC = () => {
   return (
     <Row gutter={16}>
       {tasks.map((task, index) => (
-        <Col span={5}>
+        <Col key={index} span={5}>
           <Card
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
             cover={

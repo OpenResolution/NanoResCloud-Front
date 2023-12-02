@@ -1,5 +1,5 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
-import { currentUser as queryCurrentUser } from '@/services/nanores-cloud/api';
+import { currentUser as queryCurrentUser } from '@/services/backend/oauth';
 import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
@@ -16,20 +16,26 @@ const registerPath = '/user/register';
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
+  currentUser?: API.UserInfoSchema;
   loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  fetchUserInfo?: () => Promise<API.UserInfoSchema | undefined>;
 }> {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
+      const access_token = localStorage.getItem('access_token');
+      if (!access_token) {
+        history.push(loginPath);
+      }
+      const response = await queryCurrentUser({
+        headers: {
+          authorization: `Bearer ${access_token}`,
+        },
       });
-      return msg.data;
+      return response;
     } catch (error) {
       history.push(loginPath);
+      return undefined;
     }
-    return undefined;
   };
   // 如果不是登录或注册页面，执行
   // need to exclude registerPath here, otherwise switching language would cause jumping to login
@@ -53,14 +59,14 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
   return {
     actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
     avatarProps: {
-      src: initialState?.currentUser?.avatar,
+      // src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
     },
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.currentUser?.user_name,
     },
     footerRender: () => <Footer />,
     onPageChange: () => {
