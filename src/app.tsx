@@ -22,16 +22,7 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const access_token = localStorage.getItem('access_token');
-      if (!access_token) {
-        history.push(loginPath);
-      }
-      const response = await queryCurrentUser({
-        headers: {
-          authorization: `Bearer ${access_token}`,
-        },
-      });
-      return response;
+      return await queryCurrentUser();
     } catch (error) {
       history.push(loginPath);
       return undefined;

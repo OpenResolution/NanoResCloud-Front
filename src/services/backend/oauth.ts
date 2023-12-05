@@ -3,10 +3,10 @@
 import { request } from '@umijs/max';
 
 /** Current User 鉴权用户,从header中读取
-:return: POST /api/oauth/currentUser */
+:return: GET /api/oauth/currentUser */
 export async function currentUser(options?: { [key: string]: any }) {
   return request<API.UserInfoSchema>('/api/oauth/currentUser', {
-    method: 'POST',
+    method: 'GET',
     ...(options || {}),
   });
 }

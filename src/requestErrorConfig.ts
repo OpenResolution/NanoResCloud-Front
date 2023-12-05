@@ -1,5 +1,4 @@
-﻿import type { RequestOptions } from '@@/plugin-request/request';
-import type { RequestConfig } from '@umijs/max';
+﻿import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
 
 // 错误处理方案： 错误类型
@@ -87,11 +86,26 @@ export const errorConfig: RequestConfig = {
 
   // 请求拦截器
   requestInterceptors: [
-    (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
-      //const url = config?.url?.concat('?token = 123');
-      const url = config?.url;
-      return { ...config, url };
+    // (config: RequestOptions) => {
+    //   // 拦截请求配置，进行个性化处理。
+    //   //const url = config?.url?.concat('?token = 123');
+    //   const url = config?.url;
+    //   return { ...config, url };
+    // },
+    (url, options) => {
+      // this interceptor adds the authorization header to a request
+      // see ant-design-pro issue #6433
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const authHeader = { authorization: `Bearer ${token}` };
+        return {
+          url,
+          options: { ...options, headers: { ...options.headers, ...authHeader } },
+        };
+      } else {
+        // return originial request if token doesn't exist
+        return { url, options };
+      }
     },
   ],
 

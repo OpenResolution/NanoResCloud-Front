@@ -1,21 +1,17 @@
-import {
-  getUserConfigs,
-  deleteConfigs,
-  createConfig,
-  editConfig,
-} from '@/services/nanores-cloud/config';
+import { getUserConfigs } from '@/services/backend/config';
+import { createConfig, deleteConfigs, editConfig } from '@/services/nanores-cloud/config';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
   PageContainer,
-  ProTable,
   ProDescriptions,
+  ProTable,
 } from '@ant-design/pro-components';
-import { Button, Drawer, message, Modal } from 'antd';
-import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { ConfigModalForm, ConfigTypeValueEnum, ParameterColumns, TypeToColumns } from './ModalForm';
+import { Button, Drawer, Modal, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
+import { ConfigModalForm, ConfigTypeValueEnum, ParameterColumns, TypeToColumns } from './ModalForm';
 
 const TableList: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
@@ -222,7 +218,7 @@ const TableList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.ConfigItem, API.PageParams>
+      <ProTable<API.ConfigItem, API.getUserConfigsParams>
         headerTitle={intl.formatMessage({
           id: 'pages.config.headerTitle',
           defaultMessage: 'All configurations',
@@ -243,7 +239,16 @@ const TableList: React.FC = () => {
             <PlusOutlined /> <FormattedMessage id="pages.config.create" defaultMessage="New" />
           </Button>,
         ]}
-        request={getUserConfigs}
+        request={
+          // transform parameter names
+          // "current" and "pageSize" are from ProTable, but backend uses snake case
+          async (params) => {
+            return await getUserConfigs({
+              current: params.current,
+              page_size: params.pageSize,
+            });
+          }
+        }
         columns={columns}
         rowSelection={{
           onChange: (_, nextSelectedRows) => {

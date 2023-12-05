@@ -8,7 +8,7 @@ declare namespace API {
     data: string;
   };
 
-  type ConfigFormModels = {
+  type ConfigItem = {
     /** Config Name */
     config_name: string;
     /** Config Description */
@@ -32,23 +32,53 @@ declare namespace API {
     /** Drift Correction */
     drift_correction: boolean;
     /** Subregion Size */
-    subregion_size: any;
+    subregion_size?: number;
     /** Segmentation Intensity Threshold */
-    segmentation_intensity_threshold: any;
+    segmentation_intensity_threshold?: number;
     /** Segmentation Distance Threshold */
-    segmentation_distance_threshold: any;
+    segmentation_distance_threshold?: number;
     /** Single Molecule Intensity Rejection Threshold */
-    single_molecule_intensity_rejection_threshold: any;
+    single_molecule_intensity_rejection_threshold?: number;
     /** Single Molecule Log Likelihood Rejection Threshold */
-    single_molecule_log_likelihood_rejection_threshold: any;
+    single_molecule_log_likelihood_rejection_threshold?: number;
     /** Single Molecule Localization Precision Rejection Threshold */
-    single_molecule_localization_precision_rejection_threshold: any;
+    single_molecule_localization_precision_rejection_threshold?: number;
     /** Z Reconstruction Range */
-    z_reconstruction_range: any;
+    z_reconstruction_range?: number;
     /** Z Psf Library Step Size */
-    z_psf_library_step_size: any;
+    z_psf_library_step_size?: number;
     /** Bi Plane Distance */
-    bi_plane_distance: any;
+    bi_plane_distance?: number;
+    /** Config Id */
+    config_id: string;
+    /** Created At */
+    created_at: string;
+    /** Updated At */
+    updated_at: string;
+  };
+
+  type FileFormBackModels = {
+    /** Status Code */
+    status_code: number;
+    /** Msg */
+    msg: string;
+    /** Data */
+    data: string;
+  };
+
+  type FileFormModels = {
+    /** User Id */
+    user_id: string;
+    /** File Name */
+    file_name: string;
+    /** File Type */
+    file_type: string;
+    /** File Size */
+    file_size: number;
+    /** File Platform */
+    file_platform: string;
+    /** File Path */
+    file_path: string;
   };
 
   type GetConfigBackModels = {
@@ -57,7 +87,31 @@ declare namespace API {
     /** Msg */
     msg: string;
     /** Data */
-    data: QueryConfigModels[];
+    data: ConfigItem[];
+  };
+
+  type GetFileBackModels = {
+    /** Status Code */
+    status_code: number;
+    /** Msg */
+    msg: string;
+    /** Data */
+    data: QueryFileModels[];
+  };
+
+  type getTasksParams = {
+    current: number;
+    page_size: number;
+  };
+
+  type getUserConfigsParams = {
+    current: number;
+    page_size: number;
+  };
+
+  type getUserFileParams = {
+    current: number;
+    page_size: number;
   };
 
   type HTTPValidationError = {
@@ -65,21 +119,14 @@ declare namespace API {
     detail?: ValidationError[];
   };
 
-  type QueryConfigModels = {
-    ConfigForm: ConfigFormModels;
-    /** Config Id */
-    config_id: string;
-    /** Create At */
-    create_at: string;
-    /** Update At */
-    update_at: string;
-  };
-
-  type QueryPageModel = {
-    /** Page */
-    page: number;
-    /** Page Size */
-    page_size: number;
+  type QueryFileModels = {
+    FileForm: FileFormModels;
+    /** File Id */
+    file_id: string;
+    /** Created At */
+    created_at: string;
+    /** Updated At */
+    updated_at: string;
   };
 
   type UserInfoSchema = {

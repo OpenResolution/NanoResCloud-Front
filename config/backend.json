@@ -102,7 +102,7 @@
       }
     },
     "/api/oauth/currentUser": {
-      "post": {
+      "get": {
         "tags": ["oauth"],
         "summary": "Current User",
         "description": "鉴权用户,从header中读取\n:return:",
@@ -272,12 +272,24 @@
         }
       }
     },
-    "/api/config/configs": {
+    "/api/config/getUserConfigs": {
       "get": {
         "tags": ["config"],
-        "summary": "Get Configs",
-        "operationId": "get_configs",
+        "summary": "Get User Configs",
+        "operationId": "get_user_configs",
         "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "title": "Current" }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "title": "Page Size" }
+          },
           {
             "name": "authorization",
             "in": "header",
@@ -285,12 +297,6 @@
             "schema": { "type": "string", "title": "Authorization" }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/QueryPageModel" } }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -334,6 +340,72 @@
         }
       }
     },
+    "/api/file/create_file": {
+      "post": {
+        "tags": ["file"],
+        "summary": "Create File",
+        "operationId": "create_file",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileFormBackModels" }
+              }
+            }
+          },
+          "401": { "description": "Authorization header missing" },
+          "402": { "description": "Invalid authentication scheme" },
+          "403": { "description": "Invalid authorization header format" },
+          "405": { "description": "user_id is not match" }
+        }
+      }
+    },
+    "/api/file/getUserFile": {
+      "get": {
+        "tags": ["file"],
+        "summary": "Get User File",
+        "operationId": "get_user_file",
+        "parameters": [
+          {
+            "name": "current",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "title": "Current" }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "title": "Page Size" }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string", "title": "Authorization" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/GetFileBackModels" } }
+            }
+          },
+          "401": { "description": "email already registered" },
+          "402": { "description": "email is invalid" },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/task/create_task": {
       "post": {
         "tags": ["task"],
@@ -358,18 +430,24 @@
         "operationId": "get_tasks",
         "parameters": [
           {
+            "name": "current",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "title": "Current" }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer", "title": "Page Size" }
+          },
+          {
             "name": "authorization",
             "in": "header",
             "required": false,
             "schema": { "type": "string", "title": "Authorization" }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/QueryPageModel" } }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -417,7 +495,7 @@
         "required": ["status_code", "msg", "data"],
         "title": "ConfigFormBackModels"
       },
-      "ConfigFormModels": {
+      "ConfigItem": {
         "properties": {
           "config_name": { "type": "string", "title": "Config Name" },
           "config_description": { "type": "string", "title": "Config Description" },
@@ -430,42 +508,46 @@
           "camera_offset": { "type": "integer", "title": "Camera Offset" },
           "camera_gain": { "type": "number", "title": "Camera Gain" },
           "drift_correction": { "type": "boolean", "title": "Drift Correction" },
-          "subregion_size": {
-            "anyOf": [{ "type": "integer" }, { "type": "null" }],
-            "title": "Subregion Size"
-          },
+          "subregion_size": { "type": "integer", "title": "Subregion Size", "default": 11 },
           "segmentation_intensity_threshold": {
-            "anyOf": [{ "type": "number" }, { "type": "null" }],
-            "title": "Segmentation Intensity Threshold"
+            "type": "number",
+            "title": "Segmentation Intensity Threshold",
+            "default": 40
           },
           "segmentation_distance_threshold": {
-            "anyOf": [{ "type": "integer" }, { "type": "null" }],
-            "title": "Segmentation Distance Threshold"
+            "type": "integer",
+            "title": "Segmentation Distance Threshold",
+            "default": 5
           },
           "single_molecule_intensity_rejection_threshold": {
-            "anyOf": [{ "type": "number" }, { "type": "null" }],
-            "title": "Single Molecule Intensity Rejection Threshold"
+            "type": "number",
+            "title": "Single Molecule Intensity Rejection Threshold",
+            "default": 500
           },
           "single_molecule_log_likelihood_rejection_threshold": {
-            "anyOf": [{ "type": "number" }, { "type": "null" }],
-            "title": "Single Molecule Log Likelihood Rejection Threshold"
+            "type": "number",
+            "title": "Single Molecule Log Likelihood Rejection Threshold",
+            "default": 500
           },
           "single_molecule_localization_precision_rejection_threshold": {
-            "anyOf": [{ "type": "number" }, { "type": "null" }],
-            "title": "Single Molecule Localization Precision Rejection Threshold"
+            "type": "number",
+            "title": "Single Molecule Localization Precision Rejection Threshold",
+            "default": 0.01
           },
           "z_reconstruction_range": {
-            "anyOf": [{ "type": "integer" }, { "type": "null" }],
-            "title": "Z Reconstruction Range"
+            "type": "integer",
+            "title": "Z Reconstruction Range",
+            "default": 3
           },
           "z_psf_library_step_size": {
-            "anyOf": [{ "type": "number" }, { "type": "null" }],
-            "title": "Z Psf Library Step Size"
+            "type": "number",
+            "title": "Z Psf Library Step Size",
+            "default": 0.15
           },
-          "bi_plane_distance": {
-            "anyOf": [{ "type": "number" }, { "type": "null" }],
-            "title": "Bi Plane Distance"
-          }
+          "bi_plane_distance": { "type": "number", "title": "Bi Plane Distance", "default": 0.05 },
+          "config_id": { "type": "string", "title": "Config Id" },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
         },
         "type": "object",
         "required": [
@@ -480,24 +562,49 @@
           "camera_offset",
           "camera_gain",
           "drift_correction",
-          "subregion_size",
-          "segmentation_intensity_threshold",
-          "segmentation_distance_threshold",
-          "single_molecule_intensity_rejection_threshold",
-          "single_molecule_log_likelihood_rejection_threshold",
-          "single_molecule_localization_precision_rejection_threshold",
-          "z_reconstruction_range",
-          "z_psf_library_step_size",
-          "bi_plane_distance"
+          "config_id",
+          "created_at",
+          "updated_at"
         ],
-        "title": "ConfigFormModels"
+        "title": "ConfigItem"
+      },
+      "FileFormBackModels": {
+        "properties": {
+          "status_code": { "type": "integer", "title": "Status Code" },
+          "msg": { "type": "string", "title": "Msg" },
+          "data": { "type": "string", "title": "Data" }
+        },
+        "type": "object",
+        "required": ["status_code", "msg", "data"],
+        "title": "FileFormBackModels"
+      },
+      "FileFormModels": {
+        "properties": {
+          "user_id": { "type": "string", "title": "User Id" },
+          "file_name": { "type": "string", "title": "File Name" },
+          "file_type": { "type": "string", "title": "File Type" },
+          "file_size": { "type": "integer", "title": "File Size" },
+          "file_platform": { "type": "string", "title": "File Platform" },
+          "file_path": { "type": "string", "title": "File Path" }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "file_name",
+          "file_type",
+          "file_size",
+          "file_platform",
+          "file_path"
+        ],
+        "title": "FileFormModels",
+        "description": "文件上传表单\nuser_id =\nfile_name =\nfile_type =\nfile_size =\nfile_platform =\nfile_path =\ncreated_at =\nupdated_at ="
       },
       "GetConfigBackModels": {
         "properties": {
           "status_code": { "type": "integer", "title": "Status Code" },
           "msg": { "type": "string", "title": "Msg" },
           "data": {
-            "items": { "$ref": "#/components/schemas/QueryConfigModels" },
+            "items": { "$ref": "#/components/schemas/ConfigItem" },
             "type": "array",
             "title": "Data"
           }
@@ -505,6 +612,20 @@
         "type": "object",
         "required": ["status_code", "msg", "data"],
         "title": "GetConfigBackModels"
+      },
+      "GetFileBackModels": {
+        "properties": {
+          "status_code": { "type": "integer", "title": "Status Code" },
+          "msg": { "type": "string", "title": "Msg" },
+          "data": {
+            "items": { "$ref": "#/components/schemas/QueryFileModels" },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": ["status_code", "msg", "data"],
+        "title": "GetFileBackModels"
       },
       "HTTPValidationError": {
         "properties": {
@@ -517,25 +638,16 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "QueryConfigModels": {
+      "QueryFileModels": {
         "properties": {
-          "ConfigForm": { "$ref": "#/components/schemas/ConfigFormModels" },
-          "config_id": { "type": "string", "title": "Config Id" },
-          "create_at": { "type": "string", "format": "date-time", "title": "Create At" },
-          "update_at": { "type": "string", "format": "date-time", "title": "Update At" }
+          "FileForm": { "$ref": "#/components/schemas/FileFormModels" },
+          "file_id": { "type": "string", "title": "File Id" },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
         },
         "type": "object",
-        "required": ["ConfigForm", "config_id", "create_at", "update_at"],
-        "title": "QueryConfigModels"
-      },
-      "QueryPageModel": {
-        "properties": {
-          "page": { "type": "integer", "title": "Page" },
-          "page_size": { "type": "integer", "title": "Page Size" }
-        },
-        "type": "object",
-        "required": ["page", "page_size"],
-        "title": "QueryPageModel"
+        "required": ["FileForm", "file_id", "created_at", "updated_at"],
+        "title": "QueryFileModels"
       },
       "UserInfoSchema": {
         "properties": {
