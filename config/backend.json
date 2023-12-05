@@ -256,6 +256,20 @@
         "tags": ["config"],
         "summary": "Create Config",
         "operationId": "create_config",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string", "title": "Authorization" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ConfigFields" } }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -268,7 +282,15 @@
           "401": { "description": "Authorization header missing" },
           "402": { "description": "Invalid authentication scheme" },
           "403": { "description": "Invalid authorization header format" },
-          "405": { "description": "user_id is not match" }
+          "405": { "description": "user_id is not match" },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
         }
       }
     },
@@ -485,6 +507,73 @@
   },
   "components": {
     "schemas": {
+      "ConfigFields": {
+        "properties": {
+          "config_name": { "type": "string", "title": "Config Name" },
+          "config_description": { "type": "string", "title": "Config Description" },
+          "config_type": { "type": "string", "title": "Config Type" },
+          "user_id": { "type": "string", "title": "User Id" },
+          "na": { "type": "number", "title": "Na" },
+          "wave_length": { "type": "number", "title": "Wave Length" },
+          "refractive_index": { "type": "number", "title": "Refractive Index" },
+          "pixel_size": { "type": "number", "title": "Pixel Size" },
+          "camera_offset": { "type": "integer", "title": "Camera Offset" },
+          "camera_gain": { "type": "number", "title": "Camera Gain" },
+          "drift_correction": { "type": "boolean", "title": "Drift Correction" },
+          "subregion_size": { "type": "integer", "title": "Subregion Size", "default": 11 },
+          "segmentation_intensity_threshold": {
+            "type": "number",
+            "title": "Segmentation Intensity Threshold",
+            "default": 40
+          },
+          "segmentation_distance_threshold": {
+            "type": "integer",
+            "title": "Segmentation Distance Threshold",
+            "default": 5
+          },
+          "single_molecule_intensity_rejection_threshold": {
+            "type": "number",
+            "title": "Single Molecule Intensity Rejection Threshold",
+            "default": 500
+          },
+          "single_molecule_log_likelihood_rejection_threshold": {
+            "type": "number",
+            "title": "Single Molecule Log Likelihood Rejection Threshold",
+            "default": 500
+          },
+          "single_molecule_localization_precision_rejection_threshold": {
+            "type": "number",
+            "title": "Single Molecule Localization Precision Rejection Threshold",
+            "default": 0.01
+          },
+          "z_reconstruction_range": {
+            "type": "integer",
+            "title": "Z Reconstruction Range",
+            "default": 3
+          },
+          "z_psf_library_step_size": {
+            "type": "number",
+            "title": "Z Psf Library Step Size",
+            "default": 0.15
+          },
+          "bi_plane_distance": { "type": "number", "title": "Bi Plane Distance", "default": 0.05 }
+        },
+        "type": "object",
+        "required": [
+          "config_name",
+          "config_description",
+          "config_type",
+          "user_id",
+          "na",
+          "wave_length",
+          "refractive_index",
+          "pixel_size",
+          "camera_offset",
+          "camera_gain",
+          "drift_correction"
+        ],
+        "title": "ConfigFields"
+      },
       "ConfigFormBackModels": {
         "properties": {
           "status_code": { "type": "integer", "title": "Status Code" },

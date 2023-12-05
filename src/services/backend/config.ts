@@ -3,9 +3,13 @@
 import { request } from '@umijs/max';
 
 /** Create Config POST /api/config/create_config */
-export async function createConfig(options?: { [key: string]: any }) {
+export async function createConfig(body: API.ConfigFields, options?: { [key: string]: any }) {
   return request<API.ConfigFormBackModels>('/api/config/create_config', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }

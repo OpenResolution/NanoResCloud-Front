@@ -1,5 +1,5 @@
-import { getUserConfigs } from '@/services/backend/config';
-import { createConfig, deleteConfigs, editConfig } from '@/services/nanores-cloud/config';
+import { createConfig, getUserConfigs } from '@/services/backend/config';
+import { deleteConfigs, editConfig } from '@/services/nanores-cloud/config';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -8,10 +8,17 @@ import {
   ProDescriptions,
   ProTable,
 } from '@ant-design/pro-components';
+import { useModel } from '@umijs/max';
 import { Button, Drawer, Modal, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
-import { ConfigModalForm, ConfigTypeValueEnum, ParameterColumns, TypeToColumns } from './ModalForm';
+import {
+  ConfigModalForm,
+  ConfigTypeValueEnum,
+  FormValueType,
+  ParameterColumns,
+  TypeToColumns,
+} from './ModalForm';
 
 const TableList: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
@@ -28,8 +35,11 @@ const TableList: React.FC = () => {
 
   const intl = useIntl();
 
+  const { initialState } = useModel('@@initialState');
+  const { currentUser } = initialState || {};
+
   // put handlers inside the component in order to use intl
-  const handleCreate = async (fields: API.ConfigFormFields) => {
+  const handleCreate = async (fields: FormValueType) => {
     const hide = message.loading(
       intl.formatMessage({
         id: 'pages.config.creating',
@@ -37,7 +47,7 @@ const TableList: React.FC = () => {
       }),
     );
     try {
-      await createConfig({ form_fields: fields });
+      await createConfig({ user_id: currentUser?.user_id, ...fields });
       hide();
       message.success(
         intl.formatMessage({
@@ -309,7 +319,7 @@ const TableList: React.FC = () => {
          */
         onSubmit={async (value) => {
           // TODO optional fields
-          const success = await handleCreate(value as API.ConfigFormFields);
+          const success = await handleCreate(value as FormValueType);
           if (success) {
             setCreateModalOpen(false);
             // use optional chaining instead of if clause
@@ -358,7 +368,7 @@ const TableList: React.FC = () => {
         }}
         modalOpen={editModalOpen}
         // form doesn't need config_id
-        values={(currentRow as API.ConfigFormFields) || {}}
+        values={(currentRow as FormValueType) || {}}
         title={intl.formatMessage({
           id: 'pages.config.editForm.title',
           defaultMessage: 'Edit Configuration',

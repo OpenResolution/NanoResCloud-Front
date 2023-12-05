@@ -1,24 +1,27 @@
+import type { ProColumns } from '@ant-design/pro-components';
 import {
-  StepsForm,
+  ProForm,
+  ProFormDigit,
+  ProFormSelect,
   ProFormText,
   ProFormTextArea,
-  ProFormSelect,
-  ProFormDigit,
-  ProForm,
+  StepsForm,
 } from '@ant-design/pro-components';
-import type { ProColumns } from '@ant-design/pro-components';
 import { Modal } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
-export type FormValueType = API.ConfigFormFields;
+// in addition to fields in the form, backend needs user_id
+type ConfigFormFields = Omit<API.ConfigFields, 'user_id'>;
+
+export type FormValueType = ConfigFormFields;
 
 export type FormProps = {
   onCancel: (flag?: boolean, formVals?: FormValueType) => void;
   onSubmit: (values: FormValueType) => Promise<void>;
   modalOpen: boolean;
   // use Partial<> to allow initiating only part of the fields
-  values?: Partial<API.ConfigFormFields>;
+  values?: Partial<ConfigFormFields>;
   title: React.ReactNode;
 };
 
