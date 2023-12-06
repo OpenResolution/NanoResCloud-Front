@@ -201,13 +201,12 @@ const snakeCaseToCamelCase = (input) =>
     );
 
 const modalWidth = 640;
-const paramToFormField = (intl: IntlShape, halfWidth: boolean) => (param: Parameter) => {
-  const width = 560;
-  const gap = 32;
+const paramToFormField = (intl: IntlShape, isHalfWidth: boolean) => (param: Parameter) => {
   if (param.name === 'drift_correction') {
     return (
       <ProFormSelect
-        width={(width - gap) / 2}
+        key={param.name}
+        width="sm"
         name={param.name}
         label={
           <FormattedMessage
@@ -226,7 +225,9 @@ const paramToFormField = (intl: IntlShape, halfWidth: boolean) => (param: Parame
   } else {
     return (
       <ProFormDigit
-        width={halfWidth ? (width - gap) / 2 : width}
+        // fix the warning 'Each child in a list should have a unique "key" prop.'
+        key={param.name}
+        width={isHalfWidth ? 'sm' : 'lg'}
         label={
           <FormattedMessage
             id={'pages.config.fields.' + snakeCaseToCamelCase(param.name)}
@@ -303,7 +304,8 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
     // use Modal as outermost layer to utilize its `destroyOnClose` feature
     <Modal
       width={modalWidth}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      // bodyStyle is deprecated
+      styles={{ body: { padding: '32px 40px 48px' } }}
       destroyOnClose
       title={props.title}
       open={props.modalOpen}
