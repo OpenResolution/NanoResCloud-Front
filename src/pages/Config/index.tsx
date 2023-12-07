@@ -18,7 +18,7 @@ import {
   FormValueType,
   ParameterColumns,
   TypeToColumns,
-} from './ModalForm';
+} from './components/ModalForm';
 
 const TableList: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
