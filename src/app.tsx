@@ -6,7 +6,7 @@ import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { Link, history } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
-import { errorConfig } from './requestErrorConfig';
+import { requestConfig } from './requestConfig';
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 const registerPath = '/user/register';
@@ -134,5 +134,5 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request = {
-  ...errorConfig,
+  ...requestConfig,
 };

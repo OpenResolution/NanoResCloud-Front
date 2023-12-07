@@ -19,11 +19,28 @@ interface ResponseStructure {
 }
 
 /**
- * @name 错误处理
- * pro 自带的错误处理， 可以在这里做自己的改动
+ * This interceptor adds the authorization header to a request
+ * see ant-design-pro issue #6433
+ */
+const authHeaderInterceptor = (url: string, options: RequestConfig) => {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    const authHeader = { authorization: `Bearer ${token}` };
+    return {
+      url,
+      options: { ...options, interceptors: true, headers: { ...options.headers, ...authHeader } },
+    };
+  } else {
+    // return originial request if token doesn't exist
+    return { url, options };
+  }
+};
+
+/**
+ * Request Configuration
  * @doc https://umijs.org/docs/max/request#配置
  */
-export const errorConfig: RequestConfig = {
+export const requestConfig: RequestConfig = {
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
     // 错误抛出
@@ -92,21 +109,7 @@ export const errorConfig: RequestConfig = {
     //   const url = config?.url;
     //   return { ...config, url };
     // },
-    (url, options) => {
-      // this interceptor adds the authorization header to a request
-      // see ant-design-pro issue #6433
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        const authHeader = { authorization: `Bearer ${token}` };
-        return {
-          url,
-          options: { ...options, headers: { ...options.headers, ...authHeader } },
-        };
-      } else {
-        // return originial request if token doesn't exist
-        return { url, options };
-      }
-    },
+    authHeaderInterceptor,
   ],
 
   // 响应拦截器
