@@ -20,6 +20,18 @@
         "operationId": "getUserTasks",
         "parameters": [
           {
+            "name": "current",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "title": "Current" }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "title": "Page Size" }
+          },
+          {
             "name": "user_id",
             "in": "query",
             "description": "User id",

@@ -1,54 +1,55 @@
 import { getUserTasks } from '@/services/nanores-cloud/task';
 import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
-import { Card, Col, Progress, Row } from 'antd';
-import React, { useEffect, useState } from 'react';
-
-const { Meta } = Card;
+import { PageContainer, ProList } from '@ant-design/pro-components';
+import { Card, List, Progress } from 'antd';
 
 const Task: React.FC = () => {
-  const [tasks, setTasks] = useState<API.TaskItem[]>([]);
-
-  const current_user_id = '1';
-
-  const getTasks = async () => {
-    const response = await getUserTasks({ user_id: current_user_id });
-    const userTasks = response.data;
-    setTasks(userTasks || []);
-  };
-
-  useEffect(() => {
-    getTasks();
-  }, []);
-
   return (
-    <Row gutter={16}>
-      {tasks.map((task, index) => (
-        <Col key={index} span={5}>
-          <Card
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-            cover={
-              <Progress
-                style={{ marginTop: '20px' }}
-                type="circle"
-                percent={Math.round((task.current_cycle / task.total_cycles) * 100)}
+    <PageContainer>
+      <ProList<API.TaskItem>
+        // from antd List
+        renderItem={(task) => (
+          <List.Item>
+            <Card
+              hoverable
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+              cover={
+                <Progress
+                  style={{ marginTop: '20px' }}
+                  type="circle"
+                  percent={Math.round((task.current_cycle / task.total_cycles) * 100)}
+                />
+              }
+              actions={[
+                <SettingOutlined key="setting" />,
+                <EditOutlined key="edit" />,
+                <EllipsisOutlined key="ellipsis" />,
+              ]}
+            >
+              <Card.Meta
+                style={{ textAlign: 'center' }}
+                title={task.task_name}
+                description={task.task_description}
               />
-            }
-            actions={[
-              <SettingOutlined key="setting" />,
-              <EditOutlined key="edit" />,
-              <EllipsisOutlined key="ellipsis" />,
-            ]}
-          >
-            <Meta
-              style={{ textAlign: 'center' }}
-              // avatar={<Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel" />}
-              title={task.task_name}
-              description={task.task_description}
-            />
-          </Card>
-        </Col>
-      ))}
-    </Row>
+            </Card>
+          </List.Item>
+        )}
+        headerTitle="All tasks"
+        grid={{ gutter: 16, column: 4 }}
+        request={async (params) => {
+          const response = await getUserTasks({
+            user_id: '1',
+            current: params.current,
+            page_size: params.pageSize,
+          });
+          return response;
+        }}
+      />
+    </PageContainer>
   );
 };
 
