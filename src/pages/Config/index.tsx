@@ -170,59 +170,61 @@ const TableList: React.FC = () => {
       dataIndex: 'option',
       valueType: 'option',
       align: 'center',
-      render: (_, record) => [
-        <Button
-          key="edit"
-          type="link"
-          // use small size to avoid enlarging the cell
-          size="small"
-          onClick={() => {
-            setCurrentRow(record);
-            setEditModalOpen(true);
-          }}
-        >
-          <EditOutlined /> <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
-        </Button>,
-        <Button
-          key="delete"
-          type="link"
-          size="small"
-          danger
-          onClick={() =>
-            Modal.confirm({
-              title: intl.formatMessage({
-                id: 'pages.config.singleDelete.title',
-                defaultMessage: 'Delete Configuration',
-              }),
-              content: intl.formatMessage({
-                id: 'pages.config.singleDelete.content',
-                defaultMessage: 'Are you sure you want to delete this configuration?',
-              }),
-              okText: intl.formatMessage({
-                id: 'pages.config.delete',
-                defaultMessage: 'Delete',
-              }),
-              okButtonProps: {
-                danger: true,
-              },
-              // use default cancelText
-              onOk: async () => {
-                // single-entry deletion is a special case of batch deletion
-                await handleDelete([record]);
-                // this maybe optional
-                setSelectedRows([]);
-                // refresh after deletion
-                tableActionRef.current?.reloadAndRest?.();
-                // if showDetails drawer is open, need to close it
-                setCurrentRow(undefined);
-                setShowDetails(false);
-              },
-            })
-          }
-        >
-          <DeleteOutlined /> <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
-        </Button>,
-      ],
+      render: (_, record) => (
+        <>
+          <Button
+            key="edit"
+            type="link"
+            // use small size to avoid enlarging the cell
+            size="small"
+            onClick={() => {
+              setCurrentRow(record);
+              setEditModalOpen(true);
+            }}
+          >
+            <EditOutlined /> <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
+          </Button>
+          <Button
+            key="delete"
+            type="link"
+            size="small"
+            danger
+            onClick={() =>
+              Modal.confirm({
+                title: intl.formatMessage({
+                  id: 'pages.config.singleDelete.title',
+                  defaultMessage: 'Delete Configuration',
+                }),
+                content: intl.formatMessage({
+                  id: 'pages.config.singleDelete.content',
+                  defaultMessage: 'Are you sure you want to delete this configuration?',
+                }),
+                okText: intl.formatMessage({
+                  id: 'pages.config.delete',
+                  defaultMessage: 'Delete',
+                }),
+                okButtonProps: {
+                  danger: true,
+                },
+                // use default cancelText
+                onOk: async () => {
+                  // single-entry deletion is a special case of batch deletion
+                  await handleDelete([record]);
+                  // this maybe optional
+                  setSelectedRows([]);
+                  // refresh after deletion
+                  tableActionRef.current?.reloadAndRest?.();
+                  // if showDetails drawer is open, need to close it
+                  setCurrentRow(undefined);
+                  setShowDetails(false);
+                },
+              })
+            }
+          >
+            <DeleteOutlined /> <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
+          </Button>
+        </>
+      ),
     },
   ];
 
