@@ -58,6 +58,7 @@ type Parameter = {
   max?: number;
   label?: string;
   tooltip?: string;
+  unit?: string;
 };
 
 const params2DRequired: Parameter[] = [
@@ -68,7 +69,8 @@ const params2DRequired: Parameter[] = [
     type: 'float',
     min: 0.4,
     max: 1.2,
-    label: 'Wavelength (μm)',
+    label: 'Wavelength',
+    unit: 'μm',
   },
   {
     name: 'refractive_index',
@@ -84,7 +86,8 @@ const params2DRequired: Parameter[] = [
     type: 'float',
     min: 0.05,
     max: 1,
-    label: 'Pixel size (μm)',
+    label: 'Pixel size',
+    unit: 'μm',
   },
   {
     name: 'camera_offset',
@@ -110,7 +113,8 @@ const params2DOptional: Parameter[] = [
     type: 'int',
     min: 3,
     max: 40,
-    label: 'Subregion size (pixel)',
+    label: 'Subregion size',
+    unit: 'pixel',
   },
   {
     name: 'segmentation_intensity_threshold',
@@ -126,7 +130,8 @@ const params2DOptional: Parameter[] = [
     type: 'int',
     min: 0,
     max: 20,
-    label: 'Segmentation distance threshold (pixel)',
+    label: 'Segmentation distance threshold',
+    unit: 'pixel',
   },
   {
     name: 'single_molecule_intensity_rejection_threshold',
@@ -150,7 +155,8 @@ const params2DOptional: Parameter[] = [
     type: 'float',
     min: 0,
     max: 0.05,
-    label: 'Single-molecule localization precision rejection threshold (μm)',
+    label: 'Single-molecule localization precision rejection threshold',
+    unit: 'μm',
   },
 ];
 
@@ -161,7 +167,8 @@ const params3Donly: Parameter[] = [
     type: 'int',
     min: 0,
     max: 4,
-    label: 'Z reconstruction range (μm)',
+    label: 'Z reconstruction range',
+    unit: 'μm',
   },
   {
     name: 'z_psf_library_step_size',
@@ -169,7 +176,8 @@ const params3Donly: Parameter[] = [
     type: 'float',
     min: 0,
     max: 0.2,
-    label: 'Z-PSF library step size (μm)',
+    label: 'Z-PSF library step size',
+    unit: 'μm',
   },
 ];
 
@@ -180,7 +188,8 @@ const params3DBonly: Parameter[] = [
     type: 'float',
     min: 0.05,
     max: 1,
-    label: 'Bi-plane distance (μm)',
+    label: 'Bi-plane distance',
+    unit: 'μm',
   },
 ];
 
@@ -239,7 +248,11 @@ const paramToFormField = (intl: IntlShape, isHalfWidth: boolean) => (param: Para
         max={param.max}
         tooltip={param.tooltip}
         // Number of decimal places = 0 for integer
-        fieldProps={param.type === 'int' ? { precision: 0 } : undefined}
+        fieldProps={{
+          // conditionally add a field
+          ...(param.type === 'int' && { precision: 0 }),
+          ...(param.unit && { addonAfter: param.unit }),
+        }}
         placeholder={
           // display range
           intl.formatMessage({
@@ -259,12 +272,15 @@ const paramToFormField = (intl: IntlShape, isHalfWidth: boolean) => (param: Para
   }
 };
 
-export const ParameterColumns = params3DB.map(({ name, label }) => ({
+export const ParameterColumns = params3DB.map(({ name, label, unit }) => ({
   title: (
-    <FormattedMessage
-      id={'pages.config.fields.' + snakeCaseToCamelCase(name)}
-      defaultMessage={label || name}
-    />
+    <>
+      <FormattedMessage
+        id={'pages.config.fields.' + snakeCaseToCamelCase(name)}
+        defaultMessage={label || name}
+      />
+      {unit && ` (${unit})`}
+    </>
   ),
   dataIndex: name,
   hideInTable: true,
