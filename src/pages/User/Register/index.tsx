@@ -92,6 +92,8 @@ const Register: React.FC = () => {
         },
       }}
       onFinish={async (values) => {
+        // remove an unuseful field
+        delete values.confirm_password;
         await handleSubmit(values as API.UserRegistrationSchema);
       }}
     >
@@ -202,6 +204,8 @@ const Register: React.FC = () => {
         name="password"
         fieldProps={{
           size: 'large',
+          // 'off', 'nope', 'dontshow' and 'newpassword' don't work
+          autoComplete: 'new-password',
           prefix: <LockOutlined />,
         }}
         placeholder={intl.formatMessage({
@@ -224,15 +228,17 @@ const Register: React.FC = () => {
       <ProFormDependency name={['password']}>
         {({ password }) => (
           <ProFormText.Password
-            // set name as undefined in order to exclude this field in submission
-            name={undefined}
+            // this field is unuseful for submission
+            // setting name as undefined can exclude it in submission but that would disable validator
+            name="confirm_password"
             fieldProps={{
               size: 'large',
+              autoComplete: 'new-password',
               prefix: <LockOutlined />,
             }}
             placeholder={intl.formatMessage({
               id: 'pages.register.confirmPassword.placeholder',
-              defaultMessage: 'Confirm Password',
+              defaultMessage: 'Confirm password',
             })}
             rules={[
               {
