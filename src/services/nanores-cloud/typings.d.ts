@@ -41,27 +41,6 @@ declare namespace API {
     form_fields?: ConfigFormFields;
   };
 
-  type CurrentUser = {
-    name?: string;
-    avatar?: string;
-    userid?: string;
-    email?: string;
-    signature?: string;
-    title?: string;
-    group?: string;
-    tags?: { key?: string; label?: string }[];
-    notifyCount?: number;
-    unreadCount?: number;
-    country?: string;
-    access?: string;
-    geographic?: {
-      province?: { label?: string; key?: string };
-      city?: { label?: string; key?: string };
-    };
-    address?: string;
-    phone?: string;
-  };
-
   type deleteConfigsParams = {
     /** Ids of the configs to be deleted */
     config_ids?: string[];
@@ -81,16 +60,6 @@ declare namespace API {
     success?: boolean;
   };
 
-  type FakeCaptcha = {
-    code?: number;
-    status?: string;
-  };
-
-  type getFakeCaptchaParams = {
-    /** 手机号 */
-    phone?: string;
-  };
-
   type getUserConfigsParams = {
     /** Current page */
     current?: number;
@@ -99,21 +68,10 @@ declare namespace API {
   };
 
   type getUserTasksParams = {
+    current?: number;
+    page_size?: number;
     /** User id */
     user_id?: string;
-  };
-
-  type LoginParams = {
-    email?: string;
-    password?: string;
-    autoLogin?: boolean;
-    type?: string;
-  };
-
-  type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
   };
 
   type PageParams = {

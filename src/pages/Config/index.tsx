@@ -1,21 +1,24 @@
-import {
-  getUserConfigs,
-  deleteConfigs,
-  createConfig,
-  editConfig,
-} from '@/services/nanores-cloud/config';
+import { createConfig, getUserConfigs } from '@/services/backend/config';
+import { deleteConfigs, editConfig } from '@/services/nanores-cloud/config';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
   PageContainer,
-  ProTable,
   ProDescriptions,
+  ProTable,
 } from '@ant-design/pro-components';
-import { Button, Drawer, message, Modal } from 'antd';
-import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { ConfigModalForm, ConfigTypeValueEnum, ParameterColumns, TypeToColumns } from './ModalForm';
+import { useModel } from '@umijs/max';
+import { Button, Drawer, Modal, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
+import {
+  ConfigModalForm,
+  ConfigTypeValueEnum,
+  FormValueType,
+  ParameterColumns,
+  TypeToColumns,
+} from './components/ModalForm';
 
 const TableList: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
@@ -32,8 +35,11 @@ const TableList: React.FC = () => {
 
   const intl = useIntl();
 
+  const { initialState } = useModel('@@initialState');
+  const { currentUser } = initialState || {};
+
   // put handlers inside the component in order to use intl
-  const handleCreate = async (fields: API.ConfigFormFields) => {
+  const handleCreate = async (fields: FormValueType) => {
     const hide = message.loading(
       intl.formatMessage({
         id: 'pages.config.creating',
@@ -41,7 +47,7 @@ const TableList: React.FC = () => {
       }),
     );
     try {
-      await createConfig({ form_fields: fields });
+      await createConfig({ user_id: currentUser?.user_id, ...fields });
       hide();
       message.success(
         intl.formatMessage({
@@ -164,65 +170,67 @@ const TableList: React.FC = () => {
       dataIndex: 'option',
       valueType: 'option',
       align: 'center',
-      render: (_, record) => [
-        <Button
-          key="edit"
-          type="link"
-          // use small size to avoid enlarging the cell
-          size="small"
-          onClick={() => {
-            setCurrentRow(record);
-            setEditModalOpen(true);
-          }}
-        >
-          <EditOutlined /> <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
-        </Button>,
-        <Button
-          key="delete"
-          type="link"
-          size="small"
-          danger
-          onClick={() =>
-            Modal.confirm({
-              title: intl.formatMessage({
-                id: 'pages.config.singleDelete.title',
-                defaultMessage: 'Delete Configuration',
-              }),
-              content: intl.formatMessage({
-                id: 'pages.config.singleDelete.content',
-                defaultMessage: 'Are you sure you want to delete this configuration?',
-              }),
-              okText: intl.formatMessage({
-                id: 'pages.config.delete',
-                defaultMessage: 'Delete',
-              }),
-              okButtonProps: {
-                danger: true,
-              },
-              // use default cancelText
-              onOk: async () => {
-                // single-entry deletion is a special case of batch deletion
-                await handleDelete([record]);
-                // this maybe optional
-                setSelectedRows([]);
-                // refresh after deletion
-                tableActionRef.current?.reloadAndRest?.();
-                // if showDetails drawer is open, need to close it
-                setCurrentRow(undefined);
-                setShowDetails(false);
-              },
-            })
-          }
-        >
-          <DeleteOutlined /> <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
-        </Button>,
-      ],
+      render: (_, record) => (
+        <>
+          <Button
+            key="edit"
+            type="link"
+            // use small size to avoid enlarging the cell
+            size="small"
+            onClick={() => {
+              setCurrentRow(record);
+              setEditModalOpen(true);
+            }}
+          >
+            <EditOutlined /> <FormattedMessage id="pages.config.edit" defaultMessage="Edit" />
+          </Button>
+          <Button
+            key="delete"
+            type="link"
+            size="small"
+            danger
+            onClick={() =>
+              Modal.confirm({
+                title: intl.formatMessage({
+                  id: 'pages.config.singleDelete.title',
+                  defaultMessage: 'Delete Configuration',
+                }),
+                content: intl.formatMessage({
+                  id: 'pages.config.singleDelete.content',
+                  defaultMessage: 'Are you sure you want to delete this configuration?',
+                }),
+                okText: intl.formatMessage({
+                  id: 'pages.config.delete',
+                  defaultMessage: 'Delete',
+                }),
+                okButtonProps: {
+                  danger: true,
+                },
+                // use default cancelText
+                onOk: async () => {
+                  // single-entry deletion is a special case of batch deletion
+                  await handleDelete([record]);
+                  // this maybe optional
+                  setSelectedRows([]);
+                  // refresh after deletion
+                  tableActionRef.current?.reloadAndRest?.();
+                  // if showDetails drawer is open, need to close it
+                  setCurrentRow(undefined);
+                  setShowDetails(false);
+                },
+              })
+            }
+          >
+            <DeleteOutlined /> <FormattedMessage id="pages.config.delete" defaultMessage="Delete" />
+          </Button>
+        </>
+      ),
     },
   ];
 
   return (
     <PageContainer>
-      <ProTable<API.ConfigItem, API.PageParams>
+      <ProTable<API.ConfigItem, API.getUserConfigsParams>
         headerTitle={intl.formatMessage({
           id: 'pages.config.headerTitle',
           defaultMessage: 'All configurations',
@@ -243,7 +251,16 @@ const TableList: React.FC = () => {
             <PlusOutlined /> <FormattedMessage id="pages.config.create" defaultMessage="New" />
           </Button>,
         ]}
-        request={getUserConfigs}
+        request={
+          // transform parameter names
+          // "current" and "pageSize" are from ProTable, but backend uses snake case
+          async (params) => {
+            return await getUserConfigs({
+              current: params.current,
+              page_size: params.pageSize,
+            });
+          }
+        }
         columns={columns}
         rowSelection={{
           onChange: (_, nextSelectedRows) => {
@@ -304,7 +321,7 @@ const TableList: React.FC = () => {
          */
         onSubmit={async (value) => {
           // TODO optional fields
-          const success = await handleCreate(value as API.ConfigFormFields);
+          const success = await handleCreate(value as FormValueType);
           if (success) {
             setCreateModalOpen(false);
             // use optional chaining instead of if clause
@@ -353,7 +370,7 @@ const TableList: React.FC = () => {
         }}
         modalOpen={editModalOpen}
         // form doesn't need config_id
-        values={(currentRow as API.ConfigFormFields) || {}}
+        values={(currentRow as FormValueType) || {}}
         title={intl.formatMessage({
           id: 'pages.config.editForm.title',
           defaultMessage: 'Edit Configuration',

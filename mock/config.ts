@@ -17,8 +17,8 @@ const configs = mockjs.mock({
 function getUserConfigs(req: Request, res: Response, u: string) {
   const result = {
     data: configs.array,
-    total: configs.array.length,
-    success: true,
+    // total: configs.array.length,
+    // success: true,
   };
 
   return res.json(result);
@@ -69,7 +69,7 @@ function editConfig(req: Request, res: Response, u: string) {
 }
 
 export default {
-  'GET /api/config': getUserConfigs,
+  'GET /api/config/getUserConfigs': getUserConfigs,
   'POST /api/config': createConfig,
   'DELETE /api/config': deleteConfigs,
   'PUT /api/config': editConfig,

@@ -1,8 +1,8 @@
-import { outLogin } from '@/services/nanores-cloud/login';
+import { logout } from '@/services/backend/oauth';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { history, useIntl, useModel } from '@umijs/max';
-import { Spin } from 'antd';
+import { Spin, message } from 'antd';
 import { stringify } from 'querystring';
 import type { MenuInfo } from 'rc-menu/lib/interface';
 import React, { useCallback } from 'react';
@@ -17,7 +17,7 @@ export type GlobalHeaderRightProps = {
 export const AvatarName = () => {
   const { initialState } = useModel('@@initialState');
   const { currentUser } = initialState || {};
-  return <span className="anticon">{currentUser?.name}</span>;
+  return <span className="anticon">{currentUser?.user_name}</span>;
 };
 
 export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children }) => {
@@ -27,20 +27,47 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
   /**
    * 退出登录，并且将当前的 url 保存
    */
-  const loginOut = async () => {
-    await outLogin();
-    const { search, pathname } = window.location;
-    const urlParams = new URL(window.location.href).searchParams;
-    /** 此方法会跳转到 redirect 参数所在的位置 */
-    const redirect = urlParams.get('redirect');
-    // Note: There may be security issues, please note
-    if (window.location.pathname !== '/user/login' && !redirect) {
-      history.replace({
-        pathname: '/user/login',
-        search: stringify({
-          redirect: pathname + search,
-        }),
+  const handleLogout = async () => {
+    try {
+      const access_token = localStorage.getItem('access_token');
+      if (!access_token) {
+        message.warning('Access token missing!');
+        history.push('/user/login');
+        return;
+      }
+      await logout({
+        headers: {
+          authorization: `Bearer ${access_token}`, // assuming it's a bearer token
+        },
       });
+      localStorage.removeItem('access_token');
+      message.success(
+        intl.formatMessage({
+          id: 'pages.logout.success',
+          defaultMessage: 'Logout successful!',
+        }),
+      );
+
+      const { search, pathname } = window.location;
+      const urlParams = new URL(window.location.href).searchParams;
+      /** 此方法会跳转到 redirect 参数所在的位置 */
+      const redirect = urlParams.get('redirect');
+      // Note: There may be security issues, please note
+      if (window.location.pathname !== '/user/login' && !redirect) {
+        history.replace({
+          pathname: '/user/login',
+          search: stringify({
+            redirect: pathname + search,
+          }),
+        });
+      }
+    } catch (error) {
+      message.error(
+        intl.formatMessage({
+          id: 'pages.logout.failure',
+          defaultMessage: 'Logout failed!',
+        }),
+      );
     }
   };
   const actionClassName = useEmotionCss(({ token }) => {
@@ -67,7 +94,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         flushSync(() => {
           setInitialState((s) => ({ ...s, currentUser: undefined }));
         });
-        loginOut();
+        handleLogout();
         return;
       }
       history.push(`/account/${key}`);
@@ -93,7 +120,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
 
   const { currentUser } = initialState;
 
-  if (!currentUser || !currentUser.name) {
+  if (!currentUser || !currentUser.user_name) {
     return loading;
   }
 

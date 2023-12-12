@@ -1,24 +1,27 @@
+import type { ProColumns } from '@ant-design/pro-components';
 import {
-  StepsForm,
+  ProForm,
+  ProFormDigit,
+  ProFormSelect,
   ProFormText,
   ProFormTextArea,
-  ProFormSelect,
-  ProFormDigit,
-  ProForm,
+  StepsForm,
 } from '@ant-design/pro-components';
-import type { ProColumns } from '@ant-design/pro-components';
 import { Modal } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
-export type FormValueType = API.ConfigFormFields;
+// in addition to fields in the form, backend needs user_id
+type ConfigFormFields = Omit<API.ConfigFields, 'user_id'>;
+
+export type FormValueType = ConfigFormFields;
 
 export type FormProps = {
   onCancel: (flag?: boolean, formVals?: FormValueType) => void;
   onSubmit: (values: FormValueType) => Promise<void>;
   modalOpen: boolean;
   // use Partial<> to allow initiating only part of the fields
-  values?: Partial<API.ConfigFormFields>;
+  values?: Partial<ConfigFormFields>;
   title: React.ReactNode;
 };
 
@@ -55,6 +58,7 @@ type Parameter = {
   max?: number;
   label?: string;
   tooltip?: string;
+  unit?: string;
 };
 
 const params2DRequired: Parameter[] = [
@@ -65,7 +69,8 @@ const params2DRequired: Parameter[] = [
     type: 'float',
     min: 0.4,
     max: 1.2,
-    label: 'Wavelength (μm)',
+    label: 'Wavelength',
+    unit: 'μm',
   },
   {
     name: 'refractive_index',
@@ -81,7 +86,8 @@ const params2DRequired: Parameter[] = [
     type: 'float',
     min: 0.05,
     max: 1,
-    label: 'Pixel size (μm)',
+    label: 'Pixel size',
+    unit: 'μm',
   },
   {
     name: 'camera_offset',
@@ -107,7 +113,8 @@ const params2DOptional: Parameter[] = [
     type: 'int',
     min: 3,
     max: 40,
-    label: 'Subregion size (pixel)',
+    label: 'Subregion size',
+    unit: 'pixel',
   },
   {
     name: 'segmentation_intensity_threshold',
@@ -123,7 +130,8 @@ const params2DOptional: Parameter[] = [
     type: 'int',
     min: 0,
     max: 20,
-    label: 'Segmentation distance threshold (pixel)',
+    label: 'Segmentation distance threshold',
+    unit: 'pixel',
   },
   {
     name: 'single_molecule_intensity_rejection_threshold',
@@ -147,7 +155,8 @@ const params2DOptional: Parameter[] = [
     type: 'float',
     min: 0,
     max: 0.05,
-    label: 'Single-molecule localization precision rejection threshold (μm)',
+    label: 'Single-molecule localization precision rejection threshold',
+    unit: 'μm',
   },
 ];
 
@@ -158,7 +167,8 @@ const params3Donly: Parameter[] = [
     type: 'int',
     min: 0,
     max: 4,
-    label: 'Z reconstruction range (μm)',
+    label: 'Z reconstruction range',
+    unit: 'μm',
   },
   {
     name: 'z_psf_library_step_size',
@@ -166,7 +176,8 @@ const params3Donly: Parameter[] = [
     type: 'float',
     min: 0,
     max: 0.2,
-    label: 'Z-PSF library step size (μm)',
+    label: 'Z-PSF library step size',
+    unit: 'μm',
   },
 ];
 
@@ -177,7 +188,8 @@ const params3DBonly: Parameter[] = [
     type: 'float',
     min: 0.05,
     max: 1,
-    label: 'Bi-plane distance (μm)',
+    label: 'Bi-plane distance',
+    unit: 'μm',
   },
 ];
 
@@ -198,13 +210,12 @@ const snakeCaseToCamelCase = (input) =>
     );
 
 const modalWidth = 640;
-const paramToFormField = (intl: IntlShape, halfWidth: boolean) => (param: Parameter) => {
-  const width = 560;
-  const gap = 32;
+const paramToFormField = (intl: IntlShape, isHalfWidth: boolean) => (param: Parameter) => {
   if (param.name === 'drift_correction') {
     return (
       <ProFormSelect
-        width={(width - gap) / 2}
+        key={param.name}
+        width="sm"
         name={param.name}
         label={
           <FormattedMessage
@@ -223,7 +234,9 @@ const paramToFormField = (intl: IntlShape, halfWidth: boolean) => (param: Parame
   } else {
     return (
       <ProFormDigit
-        width={halfWidth ? (width - gap) / 2 : width}
+        // fix the warning 'Each child in a list should have a unique "key" prop.'
+        key={param.name}
+        width={isHalfWidth ? 'sm' : 'lg'}
         label={
           <FormattedMessage
             id={'pages.config.fields.' + snakeCaseToCamelCase(param.name)}
@@ -235,7 +248,11 @@ const paramToFormField = (intl: IntlShape, halfWidth: boolean) => (param: Parame
         max={param.max}
         tooltip={param.tooltip}
         // Number of decimal places = 0 for integer
-        fieldProps={param.type === 'int' ? { precision: 0 } : undefined}
+        fieldProps={{
+          // conditionally add a field
+          ...(param.type === 'int' && { precision: 0 }),
+          ...(param.unit && { addonAfter: param.unit }),
+        }}
         placeholder={
           // display range
           intl.formatMessage({
@@ -255,12 +272,15 @@ const paramToFormField = (intl: IntlShape, halfWidth: boolean) => (param: Parame
   }
 };
 
-export const ParameterColumns = params3DB.map(({ name, label }) => ({
+export const ParameterColumns = params3DB.map(({ name, label, unit }) => ({
   title: (
-    <FormattedMessage
-      id={'pages.config.fields.' + snakeCaseToCamelCase(name)}
-      defaultMessage={label || name}
-    />
+    <>
+      <FormattedMessage
+        id={'pages.config.fields.' + snakeCaseToCamelCase(name)}
+        defaultMessage={label || name}
+      />
+      {unit && ` (${unit})`}
+    </>
   ),
   dataIndex: name,
   hideInTable: true,
@@ -300,7 +320,8 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
     // use Modal as outermost layer to utilize its `destroyOnClose` feature
     <Modal
       width={modalWidth}
-      bodyStyle={{ padding: '32px 40px 48px' }}
+      // bodyStyle is deprecated
+      styles={{ body: { padding: '32px 40px 48px' } }}
       destroyOnClose
       title={props.title}
       open={props.modalOpen}

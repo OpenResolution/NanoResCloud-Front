@@ -1,15 +1,14 @@
-import { login } from '@/services/nanores-cloud/login';
+import { login } from '@/services/backend/oauth';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
 import { FormattedMessage, Link, history, useIntl, useModel } from '@umijs/max';
 import { Tabs, message } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { flushSync } from 'react-dom';
-import { AuthPage, ErrorMessage } from '../components/AuthPage';
+import { AuthPage } from '../components/AuthPage';
 
 const Login: React.FC = () => {
   const intl = useIntl();
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const fetchUserInfo = async () => {
@@ -24,34 +23,33 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: API.LoginParams) => {
+  function setUserInfo(userInfo: API.UserInfoSchema) {
+    localStorage.setItem('access_token', userInfo.access_token);
+  }
+
+  const handleSubmit = async (values: API.UserLoginSchema) => {
     try {
-      // 登录
-      const msg = await login({ ...values, type: 'account' });
-      if (msg.status === 'ok') {
-        const defaultLoginSuccessMessage = intl.formatMessage({
+      const response = await login(values);
+      message.success(
+        intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: 'Login successful!',
-        });
-        message.success(defaultLoginSuccessMessage);
-        await fetchUserInfo();
-        const urlParams = new URL(window.location.href).searchParams;
-        history.push(urlParams.get('redirect') || '/');
-        return;
-      }
-      console.log(msg);
-      // 如果失败去设置用户错误信息
-      setUserLoginState(msg);
+        }),
+      );
+      const userInfo = response.data;
+      setUserInfo(userInfo);
+      await fetchUserInfo();
+      const urlParams = new URL(window.location.href).searchParams;
+      history.push(urlParams.get('redirect') || '/');
     } catch (error) {
-      const defaultLoginFailureMessage = intl.formatMessage({
-        id: 'pages.login.frontendErrorMessage',
-        defaultMessage: 'Login failed, please try again!',
-      });
-      console.log(error);
-      message.error(defaultLoginFailureMessage);
+      message.error(
+        intl.formatMessage({
+          id: 'pages.login.failure',
+          defaultMessage: 'Login failed, please try again!',
+        }),
+      );
     }
   };
-  const { status } = userLoginState;
 
   return (
     <AuthPage
@@ -71,14 +69,14 @@ const Login: React.FC = () => {
         </Link>
       }
       onFinish={async (values) => {
-        await handleSubmit(values as API.LoginParams);
+        await handleSubmit(values as API.UserLoginSchema);
       }}
     >
       <Tabs
         centered
         items={[
           {
-            key: 'account',
+            key: 'login',
             label: intl.formatMessage({
               id: 'pages.login.tab',
               defaultMessage: 'Login',
@@ -86,15 +84,6 @@ const Login: React.FC = () => {
           },
         ]}
       />
-
-      {status === 'error' && (
-        <ErrorMessage
-          content={intl.formatMessage({
-            id: 'pages.login.backendErrorMessage',
-            defaultMessage: 'Incorrect email or password',
-          })}
-        />
-      )}
 
       <ProFormText
         name="email"

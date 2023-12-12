@@ -75,20 +75,6 @@ export default [
     component: './Account',
   },
   {
-    path: '/auth',
-    layout: false,
-    routes: [
-      {
-        name: 'auth',
-        path: '/auth/verify',
-        component: './auth/verify',
-      },
-      {
-        component: './404',
-      },
-    ],
-  },
-  {
     path: '/',
     redirect: '/task',
   },
