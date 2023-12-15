@@ -1,4 +1,4 @@
-import { login } from '@/services/backend/oauth';
+import { login } from '@/services/backend/auth';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
 import { FormattedMessage, Link, history, useIntl, useModel } from '@umijs/max';
@@ -23,20 +23,19 @@ const Login: React.FC = () => {
     }
   };
 
-  function setUserInfo(userInfo: API.UserInfoSchema) {
+  function setUserInfo(userInfo: API.UserInfo) {
     localStorage.setItem('access_token', userInfo.access_token);
   }
 
-  const handleSubmit = async (values: API.UserLoginSchema) => {
+  const handleSubmit = async (values: API.LoginFields) => {
     try {
-      const response = await login(values);
+      const userInfo = await login(values);
       message.success(
         intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: 'Login successful!',
         }),
       );
-      const userInfo = response.data;
       setUserInfo(userInfo);
       await fetchUserInfo();
       const urlParams = new URL(window.location.href).searchParams;
@@ -69,7 +68,7 @@ const Login: React.FC = () => {
         </Link>
       }
       onFinish={async (values) => {
-        await handleSubmit(values as API.UserLoginSchema);
+        await handleSubmit(values as API.LoginFields);
       }}
     >
       <Tabs

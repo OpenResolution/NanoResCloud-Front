@@ -3,9 +3,8 @@ declare namespace API {
     /** Config Name */
     config_name: string;
     /** Config Description */
-    config_description: string;
-    /** Config Type */
-    config_type: string;
+    config_description?: string;
+    config_type: ConfigType;
     /** User Id */
     user_id: string;
     /** Na */
@@ -27,7 +26,7 @@ declare namespace API {
     /** Segmentation Intensity Threshold */
     segmentation_intensity_threshold?: number;
     /** Segmentation Distance Threshold */
-    segmentation_distance_threshold?: number;
+    segmentation_distance_threshold?: any;
     /** Single Molecule Intensity Rejection Threshold */
     single_molecule_intensity_rejection_threshold?: number;
     /** Single Molecule Log Likelihood Rejection Threshold */
@@ -37,27 +36,17 @@ declare namespace API {
     /** Z Reconstruction Range */
     z_reconstruction_range?: number;
     /** Z Psf Library Step Size */
-    z_psf_library_step_size?: number;
+    z_psf_library_step_size?: any;
     /** Bi Plane Distance */
     bi_plane_distance?: number;
-  };
-
-  type ConfigFormBackModels = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: string;
   };
 
   type ConfigItem = {
     /** Config Name */
     config_name: string;
     /** Config Description */
-    config_description: string;
-    /** Config Type */
-    config_type: string;
+    config_description?: string;
+    config_type: ConfigType;
     /** User Id */
     user_id: string;
     /** Na */
@@ -79,7 +68,7 @@ declare namespace API {
     /** Segmentation Intensity Threshold */
     segmentation_intensity_threshold?: number;
     /** Segmentation Distance Threshold */
-    segmentation_distance_threshold?: number;
+    segmentation_distance_threshold?: any;
     /** Single Molecule Intensity Rejection Threshold */
     single_molecule_intensity_rejection_threshold?: number;
     /** Single Molecule Log Likelihood Rejection Threshold */
@@ -89,7 +78,7 @@ declare namespace API {
     /** Z Reconstruction Range */
     z_reconstruction_range?: number;
     /** Z Psf Library Step Size */
-    z_psf_library_step_size?: number;
+    z_psf_library_step_size?: any;
     /** Bi Plane Distance */
     bi_plane_distance?: number;
     /** Config Id */
@@ -100,16 +89,18 @@ declare namespace API {
     updated_at: string;
   };
 
-  type FileFormBackModels = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: string;
+  type ConfigType = '2D' | '3D_SINGLE_PLANE' | '3D_BI_PLANE';
+
+  type deleteConfigParams = {
+    id: string;
   };
 
-  type FileFormModels = {
+  type Email = {
+    /** Email */
+    email: string;
+  };
+
+  type FileItem = {
     /** User Id */
     user_id: string;
     /** File Name */
@@ -122,48 +113,6 @@ declare namespace API {
     file_platform: string;
     /** File Path */
     file_path: string;
-  };
-
-  type GetConfigBackModels = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: ConfigItem[];
-  };
-
-  type GetFileBackModels = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: QueryFileModels[];
-  };
-
-  type getTasksParams = {
-    current: number;
-    page_size: number;
-  };
-
-  type getUserConfigsParams = {
-    current: number;
-    page_size: number;
-  };
-
-  type getUserFileParams = {
-    current: number;
-    page_size: number;
-  };
-
-  type HTTPValidationError = {
-    /** Detail */
-    detail?: ValidationError[];
-  };
-
-  type QueryFileModels = {
-    FileForm: FileFormModels;
     /** File Id */
     file_id: string;
     /** Created At */
@@ -172,7 +121,59 @@ declare namespace API {
     updated_at: string;
   };
 
-  type UserInfoSchema = {
+  type getConfigsParams = {
+    current: number;
+    page_size: number;
+  };
+
+  type getFilesParams = {
+    current: number;
+    page_size: number;
+  };
+
+  type getTasksParams = {
+    current: number;
+    page_size: number;
+  };
+
+  type HTTPError = {
+    /** Detail */
+    detail: string;
+  };
+
+  type HTTPValidationError = {
+    /** Detail */
+    detail?: ValidationError[];
+  };
+
+  type LoginFields = {
+    /** Password */
+    password: string;
+    /** Email */
+    email: string;
+  };
+
+  type RegisFields = {
+    /** Password */
+    password: string;
+    /** Username */
+    username: string;
+    /** Email */
+    email: string;
+    /** Verification Code */
+    verification_code: string;
+  };
+
+  type SuccessResponse = {
+    /** Message */
+    message: string;
+  };
+
+  type updateConfigParams = {
+    id: string;
+  };
+
+  type UserInfo = {
     /** User Name */
     user_name: string;
     /** User Id */
@@ -187,80 +188,6 @@ declare namespace API {
     expires_at: string;
     /** Token Type */
     token_type: string;
-  };
-
-  type UserLoginBackSchema = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    data: UserInfoSchema;
-  };
-
-  type UserLoginSchema = {
-    /** Email */
-    email: string;
-    /** Password */
-    password: string;
-  };
-
-  type UserLogoutBackSchema = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: string;
-  };
-
-  type UserRegisEmailBackSchema = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: string;
-  };
-
-  type UserRegisEmailSendSchema = {
-    /** Email */
-    email: string;
-  };
-
-  type UserRegistrationBackSchema = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: string;
-  };
-
-  type UserRegistrationSchema = {
-    /** Username */
-    username: string;
-    /** Email */
-    email: string;
-    /** Password */
-    password: string;
-    /** Verification Code */
-    verification_code: string;
-  };
-
-  type UserResetPasswordBackSchema = {
-    /** Status Code */
-    status_code: number;
-    /** Msg */
-    msg: string;
-    /** Data */
-    data: string;
-  };
-
-  type UserResetPasswordSchema = {
-    /** Password */
-    password: string;
-    /** Verification Code */
-    verification_code: string;
   };
 
   type ValidationError = {

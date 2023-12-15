@@ -1,83 +1,15 @@
 {
   "openapi": "3.1.0",
-  "info": { "title": "FastAPI", "version": "0.1.0" },
+  "info": { "title": "NanoRes Cloud", "version": "0.1.0" },
   "paths": {
-    "/api/oauth/register/email-verification": {
+    "/api/auth/login": {
       "post": {
-        "tags": ["oauth"],
-        "summary": "Register Email Verification",
-        "operationId": "register_email_verification",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserRegisEmailSendSchema" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserRegisEmailBackSchema" }
-              }
-            }
-          },
-          "401": { "description": "email already registered" },
-          "402": { "description": "email is invalid" },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/oauth/register": {
-      "post": {
-        "tags": ["oauth"],
-        "summary": "Register",
-        "operationId": "register",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserRegistrationSchema" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserRegistrationBackSchema" }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/oauth/login": {
-      "post": {
-        "tags": ["oauth"],
+        "tags": ["auth"],
         "summary": "Login",
         "operationId": "login",
         "requestBody": {
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/UserLoginSchema" } }
+            "application/json": { "schema": { "$ref": "#/components/schemas/LoginFields" } }
           },
           "required": true
         },
@@ -85,9 +17,13 @@
           "200": {
             "description": "Successful Response",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserLoginBackSchema" }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserInfo" } }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
             }
           },
           "422": {
@@ -101,44 +37,9 @@
         }
       }
     },
-    "/api/oauth/currentUser": {
-      "get": {
-        "tags": ["oauth"],
-        "summary": "Current User",
-        "description": "鉴权用户,从header中读取\n:return:",
-        "operationId": "current_user",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "required": false,
-            "schema": { "type": "string", "title": "Authorization" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/UserInfoSchema" } }
-            }
-          },
-          "401": { "description": "user not login" },
-          "402": { "description": "Invalid access_token" },
-          "403": { "description": "Invalid access_token" },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/oauth/logout": {
+    "/api/auth/logout": {
       "post": {
-        "tags": ["oauth"],
+        "tags": ["auth"],
         "summary": "Logout",
         "operationId": "logout",
         "parameters": [
@@ -153,9 +54,40 @@
           "200": {
             "description": "Successful Response",
             "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserLogoutBackSchema" }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Forgot Password",
+        "operationId": "forgot_password",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Email" } } },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
             }
           },
           "422": {
@@ -169,11 +101,86 @@
         }
       }
     },
-    "/api/oauth/reset_password/email-verification": {
+    "/api/auth/email-verification": {
       "post": {
-        "tags": ["oauth"],
-        "summary": "Reset Password Verification",
-        "operationId": "reset_password_verification",
+        "tags": ["auth"],
+        "summary": "Send Email Verification",
+        "operationId": "send_email_verification",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Email" } } },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "post": {
+        "tags": ["users"],
+        "summary": "Register",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/RegisFields" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Me",
+        "description": "鉴权用户,从header中读取\n:return:",
+        "operationId": "me",
         "parameters": [
           {
             "name": "authorization",
@@ -182,22 +189,18 @@
             "schema": { "type": "string", "title": "Authorization" }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserRegisEmailSendSchema" }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserResetPasswordBackSchema" }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserInfo" } }
             }
+          },
+          "401": {
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            },
+            "description": "Unauthorized"
           },
           "422": {
             "description": "Validation Error",
@@ -210,50 +213,33 @@
         }
       }
     },
-    "/api/oauth/reset_password": {
-      "post": {
-        "tags": ["oauth"],
-        "summary": "Reset Password",
-        "operationId": "reset_password",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "required": false,
-            "schema": { "type": "string", "title": "Authorization" }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserResetPasswordSchema" }
-            }
-          }
-        },
+    "/api/users/password": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Check Email Token",
+        "operationId": "check_email_token",
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserResetPasswordBackSchema" }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["users"],
+        "summary": "Update Password",
+        "operationId": "update_password",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
           }
         }
       }
     },
-    "/api/config/create_config": {
+    "/api/configs": {
       "post": {
-        "tags": ["config"],
+        "tags": ["configs"],
         "summary": "Create Config",
         "operationId": "create_config",
         "parameters": [
@@ -271,18 +257,18 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful Response",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ConfigFormBackModels" }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
             }
           },
-          "401": { "description": "Authorization header missing" },
-          "402": { "description": "Invalid authentication scheme" },
-          "403": { "description": "Invalid authorization header format" },
-          "405": { "description": "user_id is not match" },
+          "401": {
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            },
+            "description": "Unauthorized"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -292,13 +278,11 @@
             }
           }
         }
-      }
-    },
-    "/api/config/getUserConfigs": {
+      },
       "get": {
-        "tags": ["config"],
-        "summary": "Get User Configs",
-        "operationId": "get_user_configs",
+        "tags": ["configs"],
+        "summary": "Get Configs",
+        "operationId": "get_configs",
         "parameters": [
           {
             "name": "current",
@@ -324,12 +308,21 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/GetConfigBackModels" }
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ConfigItem" },
+                  "title": "Response Get Configs Api Configs Get"
+                }
               }
             }
           },
-          "401": { "description": "email already registered" },
-          "402": { "description": "email is invalid" },
+          "204": { "description": "No Configs" },
+          "401": {
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HTTPError" } }
+            },
+            "description": "Unauthorized"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -341,53 +334,84 @@
         }
       }
     },
-    "/api/config/update_config": {
-      "post": {
-        "tags": ["config"],
+    "/api/configs/{id}": {
+      "put": {
+        "tags": ["configs"],
         "summary": "Update Config",
         "operationId": "update_config",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Id" }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ConfigFormBackModels" }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
             }
           },
-          "401": { "description": "Authorization header missing" },
-          "402": { "description": "Invalid authentication scheme" },
-          "403": { "description": "Invalid authorization header format" },
-          "405": { "description": "user_id is not match" }
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["configs"],
+        "summary": "Delete Config",
+        "operationId": "delete_config",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
         }
       }
     },
-    "/api/file/create_file": {
+    "/api/files": {
       "post": {
-        "tags": ["file"],
+        "tags": ["files"],
         "summary": "Create File",
         "operationId": "create_file",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FileFormBackModels" }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
             }
-          },
-          "401": { "description": "Authorization header missing" },
-          "402": { "description": "Invalid authentication scheme" },
-          "403": { "description": "Invalid authorization header format" },
-          "405": { "description": "user_id is not match" }
+          }
         }
-      }
-    },
-    "/api/file/getUserFile": {
+      },
       "get": {
-        "tags": ["file"],
-        "summary": "Get User File",
-        "operationId": "get_user_file",
+        "tags": ["files"],
+        "summary": "Get Files",
+        "operationId": "get_files",
         "parameters": [
           {
             "name": "current",
@@ -412,11 +436,15 @@
           "200": {
             "description": "Successful Response",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/GetFileBackModels" } }
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/FileItem" },
+                  "title": "Response Get Files Api Files Get"
+                }
+              }
             }
           },
-          "401": { "description": "email already registered" },
-          "402": { "description": "email is invalid" },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -428,26 +456,20 @@
         }
       }
     },
-    "/api/task/create_task": {
+    "/api/tasks": {
       "post": {
-        "tags": ["task"],
+        "tags": ["tasks"],
         "summary": "Create Task",
         "operationId": "create_task",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "401": { "description": "Authorization header missing" },
-          "402": { "description": "Invalid authentication scheme" },
-          "403": { "description": "Invalid authorization header format" },
-          "405": { "description": "user_id is not match" }
+          }
         }
-      }
-    },
-    "/api/task/tasks": {
+      },
       "get": {
-        "tags": ["task"],
+        "tags": ["tasks"],
         "summary": "Get Tasks",
         "operationId": "get_tasks",
         "parameters": [
@@ -474,13 +496,9 @@
           "200": {
             "description": "Successful Response",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/GetConfigBackModels" }
-              }
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } }
             }
           },
-          "401": { "description": "email already registered" },
-          "402": { "description": "email is invalid" },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -491,77 +509,109 @@
           }
         }
       }
-    },
-    "/": {
-      "get": {
-        "summary": "Root",
-        "operationId": "root__get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
       "ConfigFields": {
         "properties": {
-          "config_name": { "type": "string", "title": "Config Name" },
-          "config_description": { "type": "string", "title": "Config Description" },
-          "config_type": { "type": "string", "title": "Config Type" },
+          "config_name": { "type": "string", "maxLength": 255, "title": "Config Name" },
+          "config_description": { "type": "string", "title": "Config Description", "default": "" },
+          "config_type": { "$ref": "#/components/schemas/ConfigType" },
           "user_id": { "type": "string", "title": "User Id" },
-          "na": { "type": "number", "title": "Na" },
-          "wave_length": { "type": "number", "title": "Wave Length" },
-          "refractive_index": { "type": "number", "title": "Refractive Index" },
-          "pixel_size": { "type": "number", "title": "Pixel Size" },
-          "camera_offset": { "type": "integer", "title": "Camera Offset" },
-          "camera_gain": { "type": "number", "title": "Camera Gain" },
+          "na": { "type": "number", "maximum": 1.5, "minimum": 0.5, "title": "Na" },
+          "wave_length": {
+            "type": "number",
+            "maximum": 1.2,
+            "minimum": 0.4,
+            "title": "Wave Length"
+          },
+          "refractive_index": {
+            "type": "number",
+            "maximum": 1.6,
+            "minimum": 1.0,
+            "title": "Refractive Index"
+          },
+          "pixel_size": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.05,
+            "title": "Pixel Size"
+          },
+          "camera_offset": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Camera Offset"
+          },
+          "camera_gain": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Camera Gain"
+          },
           "drift_correction": { "type": "boolean", "title": "Drift Correction" },
-          "subregion_size": { "type": "integer", "title": "Subregion Size", "default": 11 },
+          "subregion_size": {
+            "type": "integer",
+            "maximum": 40.0,
+            "minimum": 3.0,
+            "title": "Subregion Size",
+            "default": 11
+          },
           "segmentation_intensity_threshold": {
             "type": "number",
+            "maximum": 200.0,
+            "minimum": 0.0,
             "title": "Segmentation Intensity Threshold",
             "default": 40
           },
           "segmentation_distance_threshold": {
-            "type": "integer",
-            "title": "Segmentation Distance Threshold",
-            "default": 5
+            "anyOf": [{ "type": "integer", "maximum": 20.0, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Segmentation Distance Threshold"
           },
           "single_molecule_intensity_rejection_threshold": {
             "type": "number",
+            "maximum": 1000.0,
+            "minimum": 0.0,
             "title": "Single Molecule Intensity Rejection Threshold",
             "default": 500
           },
           "single_molecule_log_likelihood_rejection_threshold": {
             "type": "number",
+            "maximum": 2000.0,
+            "minimum": 0.0,
             "title": "Single Molecule Log Likelihood Rejection Threshold",
             "default": 500
           },
           "single_molecule_localization_precision_rejection_threshold": {
             "type": "number",
+            "maximum": 0.05,
+            "minimum": 0.0,
             "title": "Single Molecule Localization Precision Rejection Threshold",
             "default": 0.01
           },
           "z_reconstruction_range": {
             "type": "integer",
+            "maximum": 4.0,
+            "minimum": 0.0,
             "title": "Z Reconstruction Range",
             "default": 3
           },
           "z_psf_library_step_size": {
-            "type": "number",
-            "title": "Z Psf Library Step Size",
-            "default": 0.15
+            "anyOf": [{ "type": "number", "maximum": 0.2, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Z Psf Library Step Size"
           },
-          "bi_plane_distance": { "type": "number", "title": "Bi Plane Distance", "default": 0.05 }
+          "bi_plane_distance": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.05,
+            "title": "Bi Plane Distance",
+            "default": 0.05
+          }
         },
         "type": "object",
         "required": [
           "config_name",
-          "config_description",
           "config_type",
           "user_id",
           "na",
@@ -574,66 +624,101 @@
         ],
         "title": "ConfigFields"
       },
-      "ConfigFormBackModels": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "type": "string", "title": "Data" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "ConfigFormBackModels"
-      },
       "ConfigItem": {
         "properties": {
-          "config_name": { "type": "string", "title": "Config Name" },
-          "config_description": { "type": "string", "title": "Config Description" },
-          "config_type": { "type": "string", "title": "Config Type" },
+          "config_name": { "type": "string", "maxLength": 255, "title": "Config Name" },
+          "config_description": { "type": "string", "title": "Config Description", "default": "" },
+          "config_type": { "$ref": "#/components/schemas/ConfigType" },
           "user_id": { "type": "string", "title": "User Id" },
-          "na": { "type": "number", "title": "Na" },
-          "wave_length": { "type": "number", "title": "Wave Length" },
-          "refractive_index": { "type": "number", "title": "Refractive Index" },
-          "pixel_size": { "type": "number", "title": "Pixel Size" },
-          "camera_offset": { "type": "integer", "title": "Camera Offset" },
-          "camera_gain": { "type": "number", "title": "Camera Gain" },
+          "na": { "type": "number", "maximum": 1.5, "minimum": 0.5, "title": "Na" },
+          "wave_length": {
+            "type": "number",
+            "maximum": 1.2,
+            "minimum": 0.4,
+            "title": "Wave Length"
+          },
+          "refractive_index": {
+            "type": "number",
+            "maximum": 1.6,
+            "minimum": 1.0,
+            "title": "Refractive Index"
+          },
+          "pixel_size": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.05,
+            "title": "Pixel Size"
+          },
+          "camera_offset": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Camera Offset"
+          },
+          "camera_gain": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Camera Gain"
+          },
           "drift_correction": { "type": "boolean", "title": "Drift Correction" },
-          "subregion_size": { "type": "integer", "title": "Subregion Size", "default": 11 },
+          "subregion_size": {
+            "type": "integer",
+            "maximum": 40.0,
+            "minimum": 3.0,
+            "title": "Subregion Size",
+            "default": 11
+          },
           "segmentation_intensity_threshold": {
             "type": "number",
+            "maximum": 200.0,
+            "minimum": 0.0,
             "title": "Segmentation Intensity Threshold",
             "default": 40
           },
           "segmentation_distance_threshold": {
-            "type": "integer",
-            "title": "Segmentation Distance Threshold",
-            "default": 5
+            "anyOf": [{ "type": "integer", "maximum": 20.0, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Segmentation Distance Threshold"
           },
           "single_molecule_intensity_rejection_threshold": {
             "type": "number",
+            "maximum": 1000.0,
+            "minimum": 0.0,
             "title": "Single Molecule Intensity Rejection Threshold",
             "default": 500
           },
           "single_molecule_log_likelihood_rejection_threshold": {
             "type": "number",
+            "maximum": 2000.0,
+            "minimum": 0.0,
             "title": "Single Molecule Log Likelihood Rejection Threshold",
             "default": 500
           },
           "single_molecule_localization_precision_rejection_threshold": {
             "type": "number",
+            "maximum": 0.05,
+            "minimum": 0.0,
             "title": "Single Molecule Localization Precision Rejection Threshold",
             "default": 0.01
           },
           "z_reconstruction_range": {
             "type": "integer",
+            "maximum": 4.0,
+            "minimum": 0.0,
             "title": "Z Reconstruction Range",
             "default": 3
           },
           "z_psf_library_step_size": {
-            "type": "number",
-            "title": "Z Psf Library Step Size",
-            "default": 0.15
+            "anyOf": [{ "type": "number", "maximum": 0.2, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Z Psf Library Step Size"
           },
-          "bi_plane_distance": { "type": "number", "title": "Bi Plane Distance", "default": 0.05 },
+          "bi_plane_distance": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.05,
+            "title": "Bi Plane Distance",
+            "default": 0.05
+          },
           "config_id": { "type": "string", "title": "Config Id" },
           "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
           "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
@@ -641,7 +726,6 @@
         "type": "object",
         "required": [
           "config_name",
-          "config_description",
           "config_type",
           "user_id",
           "na",
@@ -657,24 +741,28 @@
         ],
         "title": "ConfigItem"
       },
-      "FileFormBackModels": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "type": "string", "title": "Data" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "FileFormBackModels"
+      "ConfigType": {
+        "type": "string",
+        "enum": ["2D", "3D_SINGLE_PLANE", "3D_BI_PLANE"],
+        "title": "ConfigType"
       },
-      "FileFormModels": {
+      "Email": {
+        "properties": { "email": { "type": "string", "format": "email", "title": "Email" } },
+        "type": "object",
+        "required": ["email"],
+        "title": "Email"
+      },
+      "FileItem": {
         "properties": {
           "user_id": { "type": "string", "title": "User Id" },
           "file_name": { "type": "string", "title": "File Name" },
           "file_type": { "type": "string", "title": "File Type" },
           "file_size": { "type": "integer", "title": "File Size" },
           "file_platform": { "type": "string", "title": "File Platform" },
-          "file_path": { "type": "string", "title": "File Path" }
+          "file_path": { "type": "string", "title": "File Path" },
+          "file_id": { "type": "string", "title": "File Id" },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
         },
         "type": "object",
         "required": [
@@ -683,38 +771,18 @@
           "file_type",
           "file_size",
           "file_platform",
-          "file_path"
+          "file_path",
+          "file_id",
+          "created_at",
+          "updated_at"
         ],
-        "title": "FileFormModels",
-        "description": "文件上传表单\nuser_id =\nfile_name =\nfile_type =\nfile_size =\nfile_platform =\nfile_path =\ncreated_at =\nupdated_at ="
+        "title": "FileItem"
       },
-      "GetConfigBackModels": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": {
-            "items": { "$ref": "#/components/schemas/ConfigItem" },
-            "type": "array",
-            "title": "Data"
-          }
-        },
+      "HTTPError": {
+        "properties": { "detail": { "type": "string", "title": "Detail" } },
         "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "GetConfigBackModels"
-      },
-      "GetFileBackModels": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": {
-            "items": { "$ref": "#/components/schemas/QueryFileModels" },
-            "type": "array",
-            "title": "Data"
-          }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "GetFileBackModels"
+        "required": ["detail"],
+        "title": "HTTPError"
       },
       "HTTPValidationError": {
         "properties": {
@@ -727,18 +795,42 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "QueryFileModels": {
+      "LoginFields": {
         "properties": {
-          "FileForm": { "$ref": "#/components/schemas/FileFormModels" },
-          "file_id": { "type": "string", "title": "File Id" },
-          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
-          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
+          "password": {
+            "type": "string",
+            "pattern": "^(?![A-z0-9]+$)(?=.[^%&',;=?$\"])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,20}$",
+            "title": "Password"
+          },
+          "email": { "type": "string", "format": "email", "title": "Email" }
         },
         "type": "object",
-        "required": ["FileForm", "file_id", "created_at", "updated_at"],
-        "title": "QueryFileModels"
+        "required": ["password", "email"],
+        "title": "LoginFields"
       },
-      "UserInfoSchema": {
+      "RegisFields": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "pattern": "^(?![A-z0-9]+$)(?=.[^%&',;=?$\"])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,20}$",
+            "title": "Password"
+          },
+          "username": { "type": "string", "pattern": "^[一-龥a-zA-Z0-9]+$", "title": "Username" },
+          "email": { "type": "string", "format": "email", "title": "Email" },
+          "verification_code": { "type": "string", "title": "Verification Code" }
+        },
+        "type": "object",
+        "required": ["password", "username", "email", "verification_code"],
+        "title": "RegisFields"
+      },
+      "SuccessResponse": {
+        "properties": { "message": { "type": "string", "title": "Message" } },
+        "type": "object",
+        "required": ["message"],
+        "title": "SuccessResponse",
+        "description": "Simple success response"
+      },
+      "UserInfo": {
         "properties": {
           "user_name": { "type": "string", "title": "User Name" },
           "user_id": { "type": "string", "title": "User Id" },
@@ -758,92 +850,7 @@
           "expires_at",
           "token_type"
         ],
-        "title": "UserInfoSchema"
-      },
-      "UserLoginBackSchema": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "$ref": "#/components/schemas/UserInfoSchema" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "UserLoginBackSchema"
-      },
-      "UserLoginSchema": {
-        "properties": {
-          "email": { "type": "string", "title": "Email" },
-          "password": { "type": "string", "title": "Password" }
-        },
-        "type": "object",
-        "required": ["email", "password"],
-        "title": "UserLoginSchema"
-      },
-      "UserLogoutBackSchema": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "type": "string", "title": "Data" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "UserLogoutBackSchema"
-      },
-      "UserRegisEmailBackSchema": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "type": "string", "title": "Data" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "UserRegisEmailBackSchema"
-      },
-      "UserRegisEmailSendSchema": {
-        "properties": { "email": { "type": "string", "title": "Email" } },
-        "type": "object",
-        "required": ["email"],
-        "title": "UserRegisEmailSendSchema"
-      },
-      "UserRegistrationBackSchema": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "type": "string", "title": "Data" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "UserRegistrationBackSchema"
-      },
-      "UserRegistrationSchema": {
-        "properties": {
-          "username": { "type": "string", "title": "Username" },
-          "email": { "type": "string", "title": "Email" },
-          "password": { "type": "string", "title": "Password" },
-          "verification_code": { "type": "string", "title": "Verification Code" }
-        },
-        "type": "object",
-        "required": ["username", "email", "password", "verification_code"],
-        "title": "UserRegistrationSchema"
-      },
-      "UserResetPasswordBackSchema": {
-        "properties": {
-          "status_code": { "type": "integer", "title": "Status Code" },
-          "msg": { "type": "string", "title": "Msg" },
-          "data": { "type": "string", "title": "Data" }
-        },
-        "type": "object",
-        "required": ["status_code", "msg", "data"],
-        "title": "UserResetPasswordBackSchema"
-      },
-      "UserResetPasswordSchema": {
-        "properties": {
-          "password": { "type": "string", "title": "Password" },
-          "verification_code": { "type": "string", "title": "Verification Code" }
-        },
-        "type": "object",
-        "required": ["password", "verification_code"],
-        "title": "UserResetPasswordSchema"
+        "title": "UserInfo"
       },
       "ValidationError": {
         "properties": {

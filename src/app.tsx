@@ -1,5 +1,5 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
-import { currentUser as queryCurrentUser } from '@/services/backend/oauth';
+import { me } from '@/services/backend/users';
 import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
@@ -16,13 +16,13 @@ const registerPath = '/user/register';
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
-  currentUser?: API.UserInfoSchema;
+  currentUser?: API.UserInfo;
   loading?: boolean;
-  fetchUserInfo?: () => Promise<API.UserInfoSchema | undefined>;
+  fetchUserInfo?: () => Promise<API.UserInfo | undefined>;
 }> {
   const fetchUserInfo = async () => {
     try {
-      return await queryCurrentUser();
+      return await me();
     } catch (error) {
       history.push(loginPath);
       return undefined;

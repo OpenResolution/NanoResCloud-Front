@@ -1,4 +1,4 @@
-import { getUserConfigs } from '@/services/backend/config';
+import { getConfigs } from '@/services/backend/configs';
 import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-components';
 import { useIntl } from '@umijs/max';
@@ -57,8 +57,8 @@ const TaskForm = () => {
         params={{}}
         request={async (params) => {
           console.log(params);
-          const response = await getUserConfigs({ current: 1, page_size: 10 });
-          return response.data.map((item) => {
+          const configs = await getConfigs({ current: 1, page_size: 10 });
+          return configs.map((item) => {
             // can add other information to the label to help user identify a configuration
             return { label: item.config_name, value: item.config_id };
           });

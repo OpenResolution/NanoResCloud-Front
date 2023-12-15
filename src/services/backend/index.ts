@@ -2,15 +2,15 @@
 /* eslint-disable */
 // API 更新时间：
 // API 唯一标识：
-import * as config from './config';
-import * as file from './file';
-import * as oauth from './oauth';
-import * as rootGet from './rootGet';
-import * as task from './task';
+import * as auth from './auth';
+import * as configs from './configs';
+import * as files from './files';
+import * as tasks from './tasks';
+import * as users from './users';
 export default {
-  oauth,
-  config,
-  file,
-  task,
-  rootGet,
+  auth,
+  users,
+  configs,
+  files,
+  tasks,
 };

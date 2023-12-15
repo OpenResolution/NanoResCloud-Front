@@ -1,4 +1,4 @@
-import { createConfig, getUserConfigs } from '@/services/backend/config';
+import { createConfig, getConfigs } from '@/services/backend/configs';
 import { deleteConfigs, editConfig } from '@/services/nanores-cloud/config';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
@@ -255,10 +255,24 @@ const TableList: React.FC = () => {
           // transform parameter names
           // "current" and "pageSize" are from ProTable, but backend uses snake case
           async (params) => {
-            return await getUserConfigs({
-              current: params.current,
-              page_size: params.pageSize,
-            });
+            try {
+              const configs = await getConfigs({
+                current: params.current,
+                page_size: params.pageSize,
+              });
+              return {
+                // need to add extra fields to conform to ProTable's interface
+                data: configs,
+                total: configs.length,
+                success: true,
+              };
+            } catch (error) {
+              return {
+                data: [],
+                total: 0,
+                success: false,
+              };
+            }
           }
         }
         columns={columns}

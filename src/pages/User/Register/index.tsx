@@ -1,4 +1,5 @@
-import { register, registerEmailVerification } from '@/services/backend/oauth';
+import { sendEmailVerification } from '@/services/backend/auth';
+import { register } from '@/services/backend/users';
 import { LockOutlined, MailOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
 import { ProFormCaptcha, ProFormDependency, ProFormText } from '@ant-design/pro-components';
 import { FormattedMessage, Link, history, useIntl } from '@umijs/max';
@@ -20,7 +21,7 @@ const Register: React.FC = () => {
   const handleGetVerificationCode = async (email: string) => {
     try {
       // use shorthand syntax for object property
-      const response = await registerEmailVerification({ email } as API.UserRegisEmailSendSchema);
+      const response = await sendEmailVerification({ email } as API.Email);
       console.log(response);
       message.success(
         intl.formatMessage({
@@ -40,18 +41,16 @@ const Register: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: API.UserRegistrationSchema) => {
+  const handleSubmit = async (values: API.RegisFields) => {
     try {
-      const response = await register(values);
-      if (response.status_code === 200) {
-        message.success(
-          intl.formatMessage({
-            id: 'pages.register.success',
-            defaultMessage: 'Registration successful!',
-          }),
-        );
-        history.push('/user/login');
-      }
+      await register(values);
+      message.success(
+        intl.formatMessage({
+          id: 'pages.register.success',
+          defaultMessage: 'Registration successful!',
+        }),
+      );
+      history.push('/user/login');
     } catch (error) {
       message.error(
         intl.formatMessage({
@@ -94,7 +93,7 @@ const Register: React.FC = () => {
       onFinish={async (values) => {
         // remove an unuseful field
         delete values.confirm_password;
-        await handleSubmit(values as API.UserRegistrationSchema);
+        await handleSubmit(values as API.RegisFields);
       }}
     >
       <Tabs

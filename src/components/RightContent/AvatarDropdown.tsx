@@ -1,4 +1,4 @@
-import { logout } from '@/services/backend/oauth';
+import { logout } from '@/services/backend/auth';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { history, useIntl, useModel } from '@umijs/max';
