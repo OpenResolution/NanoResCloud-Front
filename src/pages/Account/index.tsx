@@ -1,164 +1,143 @@
-import { PageContainer } from '@ant-design/pro-components';
+import type { ProFormInstance } from '@ant-design/pro-components';
+import { PageContainer, ProForm, ProFormText } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
-import { Card, theme } from 'antd';
-import React from 'react';
+import { message } from 'antd';
+import { useRef } from 'react';
+//import { useIntl } from 'umi';
 
-/**
- * 每个单独的卡片，为了复用样式抽成了组件
- * @param param0
- * @returns
- */
-const InfoCard: React.FC<{
-  title: string;
-  index: number;
-  desc: string;
-  href: string;
-}> = ({ title, href, index, desc }) => {
-  const { useToken } = theme;
-
-  const { token } = useToken();
-
-  return (
-    <div
-      style={{
-        backgroundColor: token.colorBgContainer,
-        boxShadow: token.boxShadow,
-        borderRadius: '8px',
-        fontSize: '14px',
-        color: token.colorTextSecondary,
-        lineHeight: '22px',
-        padding: '16px 19px',
-        minWidth: '220px',
-        flex: 1,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            lineHeight: '22px',
-            backgroundSize: '100%',
-            textAlign: 'center',
-            padding: '8px 16px 16px 12px',
-            color: '#FFF',
-            fontWeight: 'bold',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/zos/bmw-prod/daaf8d50-8e6d-4251-905d-676a24ddfa12.svg')",
-          }}
-        >
-          {index}
-        </div>
-        <div
-          style={{
-            fontSize: '16px',
-            color: token.colorText,
-            paddingBottom: 8,
-          }}
-        >
-          {title}
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: '14px',
-          color: token.colorTextSecondary,
-          textAlign: 'justify',
-          lineHeight: '22px',
-          marginBottom: 8,
-        }}
-      >
-        {desc}
-      </div>
-      <a href={href} target="_blank" rel="noreferrer">
-        了解更多 {'>'}
-      </a>
-    </div>
-  );
+const waitTime = (time: number = 100) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, time);
+  });
 };
 
-const Welcome: React.FC = () => {
-  const { token } = theme.useToken();
+const Account: React.FC = () => {
+  //const intl = useIntl();
+
   const { initialState } = useModel('@@initialState');
+  const { currentUser } = initialState || {};
+  const formRef = useRef<
+    ProFormInstance<{
+      userName: string;
+      userEmail: string;
+      useMode?: string;
+    }>
+  >();
   return (
     <PageContainer>
-      <Card
-        style={{
-          borderRadius: 8,
+      <ProForm<{
+        userName: string;
+        userEmail: string;
+        useMode?: string;
+      }>
+        onFinish={async (values) => {
+          await waitTime(2000);
+          console.log(values);
+          const val1 = await formRef.current?.validateFields();
+          console.log('validateFields:', val1);
+          const val2 = await formRef.current?.validateFieldsReturnFormatValue?.();
+          console.log('validateFieldsReturnFormatValue:', val2);
+          message.success('提交成功');
         }}
-        bodyStyle={{
-          backgroundImage:
-            initialState?.settings?.navTheme === 'realDark'
-              ? 'background-image: linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
-              : 'background-image: linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
+        formRef={formRef}
+        params={{ id: '100' }}
+        formKey="base-form-use-demo"
+        dateFormatter={(value, valueType) => {
+          console.log('---->', value, valueType);
+          return value.format('YYYY/MM/DD HH:mm:ss');
         }}
+        request={async () => {
+          await waitTime(1500);
+          return {
+            name: currentUser?.user_name,
+            email: currentUser?.user_email,
+            useMode: 'chapter',
+          };
+        }}
+        autoFocusFirstInput
       >
-        <div
-          style={{
-            backgroundPosition: '100% -30%',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '274px auto',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/mdn/rms_a9745b/afts/img/A*BuFmQqsB2iAAAAAAAAAAAAAAARQnAQ')",
+        <ProForm.Group>
+          <ProFormText
+            width="md"
+            name="name"
+            //required
+            //dependencies={[['contract', 'name']]}
+            label="用户名"
+            //tooltip="最长为 24 位"
+            placeholder="请输入名称"
+            //rules={[{ required: true, message: '这是必填项' }]}
+          />
+        </ProForm.Group>
+        <ProForm.Group>
+          <ProFormText
+            width="md"
+            name="email"
+            fieldProps={{ disabled: true }}
+            //required
+            //dependencies={[['contract', 'name']]}
+            label="邮箱"
+            //tooltip="最长为 24 位"
+            placeholder="请输入名称"
+            //rules={[{ required: true, message: '这是必填项' }]}
+          />
+        </ProForm.Group>
+
+        {/* <ProFormTextArea colProps={{ span: 24 }} name="address" label="个人简介" />
+        <ProFormSelect
+          width="md"
+          label="国家/地区"
+          name="level"
+          valueEnum={{
+            1: 'front end',
+            2: 'back end',
+            3: 'full stack',
           }}
-        >
-          <div
-            style={{
-              fontSize: '20px',
-              color: token.colorTextHeading,
+        />
+
+        <ProForm.Group>
+          <ProFormSelect
+            width={200}
+            formItemProps={{ style: { marginRight: '-25px' } }}
+            label="所在省"
+            name="province"
+            valueEnum={{
+              1: 'front end',
+              2: 'back end',
+              3: 'full stack',
             }}
-          >
-            欢迎使用 Ant Design Pro
-          </div>
-          <p
-            style={{
-              fontSize: '14px',
-              color: token.colorTextSecondary,
-              lineHeight: '22px',
-              marginTop: 16,
-              marginBottom: 32,
-              width: '65%',
+          />
+          <ProFormSelect
+            width={300}
+            name="city"
+            label="所在市"
+            valueEnum={{
+              1: 'front end',
+              2: 'back end',
+              3: 'full stack',
             }}
-          >
-            Ant Design Pro 是一个整合了 umi，Ant Design 和 ProComponents
-            的脚手架方案。致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 16,
-            }}
-          >
-            <InfoCard
-              index={1}
-              href="https://umijs.org/docs/introduce/introduce"
-              title="了解 umi"
-              desc="umi 是一个可扩展的企业级前端应用框架,umi 以路由为基础的，同时支持配置式路由和约定式路由，保证路由的功能完备，并以此进行功能扩展。"
-            />
-            <InfoCard
-              index={2}
-              title="了解 ant design"
-              href="https://ant.design"
-              desc="antd 是基于 Ant Design 设计体系的 React UI 组件库，主要用于研发企业级中后台产品。"
-            />
-            <InfoCard
-              index={3}
-              title="了解 Pro Components"
-              href="https://procomponents.ant.design"
-              desc="ProComponents 是一个基于 Ant Design 做了更高抽象的模板组件，以 一个组件就是一个页面为开发理念，为中后台开发带来更好的体验。"
-            />
-          </div>
-        </div>
-      </Card>
+          />
+        </ProForm.Group>
+        <ProFormText
+          name={['contract', 'name']}
+          width="md"
+          label="街道地址"
+          placeholder="请输入名称"
+        />
+        <ProForm.Group>
+          <ProFormText
+            name={['contract', 'name']}
+            width={100}
+            formItemProps={{ style: { marginRight: '-25px' } }}
+            label="联系电话"
+            placeholder="请输入名称"
+          />
+          <ProFormText name={['contract', 'name']} width={300} label=" " placeholder="请输入名称" />
+        </ProForm.Group> */}
+      </ProForm>
     </PageContainer>
   );
 };
 
-export default Welcome;
+export default Account;
