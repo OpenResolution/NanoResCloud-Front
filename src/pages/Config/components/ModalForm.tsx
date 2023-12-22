@@ -11,8 +11,8 @@ import { Modal } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'umi';
 
-// in addition to fields in the form, backend needs user_id
-type ConfigFormFields = Omit<API.ConfigFields, 'user_id'>;
+// in addition to fields in the form, backend needs owner
+type ConfigFormFields = Omit<API.ConfigFields, 'owner'>;
 
 export type FormValueType = ConfigFormFields;
 
@@ -64,7 +64,7 @@ type Parameter = {
 const params2DRequired: Parameter[] = [
   { name: 'na', required: true, type: 'float', min: 0.5, max: 1.5, label: 'NA' },
   {
-    name: 'wave_length',
+    name: 'wavelength',
     required: true,
     type: 'float',
     min: 0.4,
@@ -196,7 +196,7 @@ const params3DBonly: Parameter[] = [
 const params2D = params2DRequired.concat(params2DOptional);
 const params3DS = params2D.concat(params3Donly);
 const params3DB = params2DRequired.concat(params3DBonly, params2DOptional, params3Donly);
-const fieldsBasic = ['config_name', 'config_description', 'config_type', 'option'];
+const fieldsBasic = ['name', 'description', 'type', 'option'];
 
 const snakeCaseToCamelCase = (input) =>
   input
@@ -307,14 +307,14 @@ export const TypeToColumns = (
 export const ConfigModalForm: React.FC<FormProps> = (props) => {
   const intl = useIntl();
   const [currentConfigType, setCurrentConfigType] = useState<API.ConfigType>(
-    props.values?.config_type || '2D',
+    props.values?.type || '2D',
   );
 
   // state is only initiated once and doesn't change when props change
   // therefore need to keep state in sync with props
   useEffect(() => {
-    setCurrentConfigType(props.values?.config_type || '2D');
-  }, [props.values?.config_type]);
+    setCurrentConfigType(props.values?.type || '2D');
+  }, [props.values?.type]);
 
   return (
     // use Modal as outermost layer to utilize its `destroyOnClose` feature
@@ -338,8 +338,8 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
         onFinish={props.onSubmit}
         // according to docs, "StepsForm inherits from Form.Provider", which has onFormChange
         onFormChange={(formName, info) => {
-          // watch the change of config_type
-          if (info.changedFields[0].name[0] === 'config_type') {
+          // watch the change of config type
+          if (info.changedFields[0].name[0] === 'type') {
             const newValue = info.changedFields[0].value;
             setCurrentConfigType(newValue);
           }
@@ -366,7 +366,7 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
               },
             ]}
             // width="md"
-            name="config_name"
+            name="name"
             label={intl.formatMessage({
               id: 'pages.config.fields.name',
               defaultMessage: 'Name',
@@ -374,14 +374,14 @@ export const ConfigModalForm: React.FC<FormProps> = (props) => {
           />
           <ProFormTextArea
             // width="md"
-            name="config_description"
+            name="description"
             label={intl.formatMessage({
               id: 'pages.config.fields.description',
               defaultMessage: 'Description',
             })}
           />
           <ProFormSelect
-            name="config_type"
+            name="type"
             label={intl.formatMessage({
               id: 'pages.config.fields.type',
               defaultMessage: 'Type',

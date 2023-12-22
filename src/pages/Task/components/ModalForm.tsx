@@ -58,9 +58,9 @@ const TaskForm = () => {
         request={async (params) => {
           console.log(params);
           const configs = await getConfigs({ current: 1, page_size: 10 });
-          return configs.map((item) => {
+          return configs.map((config) => {
             // can add other information to the label to help user identify a configuration
-            return { label: item.config_name, value: item.config_id };
+            return { label: config.name, value: config.id };
           });
         }}
         placeholder="Please select a configuration"
