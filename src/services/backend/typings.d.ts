@@ -1,16 +1,16 @@
 declare namespace API {
   type ConfigFields = {
-    /** Config Name */
-    config_name: string;
-    /** Config Description */
-    config_description?: string;
-    config_type: ConfigType;
-    /** User Id */
-    user_id: string;
+    /** Owner */
+    owner: string;
+    /** Name */
+    name: string;
+    /** Description */
+    description?: string;
+    type: ConfigType;
     /** Na */
     na: number;
-    /** Wave Length */
-    wave_length: number;
+    /** Wavelength */
+    wavelength: number;
     /** Refractive Index */
     refractive_index: number;
     /** Pixel Size */
@@ -21,6 +21,8 @@ declare namespace API {
     camera_gain: number;
     /** Drift Correction */
     drift_correction: boolean;
+    /** Bi Plane Distance */
+    bi_plane_distance?: number;
     /** Subregion Size */
     subregion_size?: number;
     /** Segmentation Intensity Threshold */
@@ -37,22 +39,20 @@ declare namespace API {
     z_reconstruction_range?: number;
     /** Z Psf Library Step Size */
     z_psf_library_step_size?: any;
-    /** Bi Plane Distance */
-    bi_plane_distance?: number;
   };
 
   type ConfigItem = {
-    /** Config Name */
-    config_name: string;
-    /** Config Description */
-    config_description?: string;
-    config_type: ConfigType;
-    /** User Id */
-    user_id: string;
+    /** Owner */
+    owner: string;
+    /** Name */
+    name: string;
+    /** Description */
+    description?: string;
+    type: ConfigType;
     /** Na */
     na: number;
-    /** Wave Length */
-    wave_length: number;
+    /** Wavelength */
+    wavelength: number;
     /** Refractive Index */
     refractive_index: number;
     /** Pixel Size */
@@ -63,6 +63,8 @@ declare namespace API {
     camera_gain: number;
     /** Drift Correction */
     drift_correction: boolean;
+    /** Bi Plane Distance */
+    bi_plane_distance?: number;
     /** Subregion Size */
     subregion_size?: number;
     /** Segmentation Intensity Threshold */
@@ -79,10 +81,8 @@ declare namespace API {
     z_reconstruction_range?: number;
     /** Z Psf Library Step Size */
     z_psf_library_step_size?: any;
-    /** Bi Plane Distance */
-    bi_plane_distance?: number;
-    /** Config Id */
-    config_id: string;
+    /** Id */
+    id: string;
     /** Created At */
     created_at: string;
     /** Updated At */
@@ -100,38 +100,7 @@ declare namespace API {
     email: string;
   };
 
-  type FileItem = {
-    /** User Id */
-    user_id: string;
-    /** File Name */
-    file_name: string;
-    /** File Type */
-    file_type: string;
-    /** File Size */
-    file_size: number;
-    /** File Platform */
-    file_platform: string;
-    /** File Path */
-    file_path: string;
-    /** File Id */
-    file_id: string;
-    /** Created At */
-    created_at: string;
-    /** Updated At */
-    updated_at: string;
-  };
-
   type getConfigsParams = {
-    current: number;
-    page_size: number;
-  };
-
-  type getFilesParams = {
-    current: number;
-    page_size: number;
-  };
-
-  type getTasksParams = {
     current: number;
     page_size: number;
   };
@@ -156,8 +125,8 @@ declare namespace API {
   type RegisFields = {
     /** Password */
     password: string;
-    /** Username */
-    username: string;
+    /** Name */
+    name: string;
     /** Email */
     email: string;
     /** Verification Code */
@@ -174,12 +143,12 @@ declare namespace API {
   };
 
   type UserInfo = {
-    /** User Name */
-    user_name: string;
-    /** User Id */
-    user_id: string;
-    /** User Email */
-    user_email: string;
+    /** Name */
+    name: string;
+    /** Id */
+    id: string;
+    /** Email */
+    email: string;
     /** Access Token */
     access_token: string;
     /** Refresh Token */

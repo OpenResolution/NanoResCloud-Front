@@ -110,21 +110,21 @@ const Register: React.FC = () => {
         ]}
       />
       <ProFormText
-        name="username"
+        name="name"
         fieldProps={{
           size: 'large',
           prefix: <UserOutlined />,
         }}
         placeholder={intl.formatMessage({
-          id: 'pages.register.username.placeholder',
-          defaultMessage: 'Username',
+          id: 'pages.register.name.placeholder',
+          defaultMessage: 'Name',
         })}
         rules={[
           {
             required: true,
             message: (
               <FormattedMessage
-                id="pages.register.username.required"
+                id="pages.register.name.required"
                 defaultMessage="Please enter username!"
               />
             ),

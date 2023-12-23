@@ -47,7 +47,7 @@ const TableList: React.FC = () => {
       }),
     );
     try {
-      await createConfig({ user_id: currentUser?.user_id, ...fields });
+      await createConfig({ owner: currentUser?.id, ...fields });
       hide();
       message.success(
         intl.formatMessage({
@@ -78,7 +78,7 @@ const TableList: React.FC = () => {
     if (!selectedRowsToDelete) return true;
     try {
       await deleteConfigs({
-        config_ids: selectedRowsToDelete.map((row) => row.config_id),
+        config_ids: selectedRowsToDelete.map((row) => row.id),
       });
       hide();
       message.success(
@@ -132,14 +132,14 @@ const TableList: React.FC = () => {
   const columns: ProColumns<API.ConfigItem>[] = [
     {
       // used as key, hidden from display
-      dataIndex: 'config_id',
+      dataIndex: 'id',
       hideInSearch: true,
       hideInTable: true,
       hideInDescriptions: true,
     },
     {
       title: <FormattedMessage id="pages.config.fields.name" defaultMessage="Name" />,
-      dataIndex: 'config_name',
+      dataIndex: 'name',
       tip: 'Configuation name',
       render: (dom, entity) => {
         return (
@@ -156,12 +156,12 @@ const TableList: React.FC = () => {
     },
     {
       title: <FormattedMessage id="pages.config.fields.description" defaultMessage="Description" />,
-      dataIndex: 'config_description',
+      dataIndex: 'description',
       valueType: 'textarea',
     },
     {
       title: <FormattedMessage id="pages.config.fields.type" defaultMessage="Type" />,
-      dataIndex: 'config_type',
+      dataIndex: 'type',
       valueEnum: ConfigTypeValueEnum,
     },
     ...ParameterColumns,
@@ -237,7 +237,7 @@ const TableList: React.FC = () => {
         })}
         actionRef={tableActionRef}
         // rowKey must be unique for row selection to work properly
-        rowKey="config_id"
+        rowKey="id"
         // hide search panel
         search={false}
         toolBarRender={() => [
@@ -350,7 +350,7 @@ const TableList: React.FC = () => {
         }}
         modalOpen={createModalOpen}
         values={{
-          config_name: intl.formatMessage({
+          name: intl.formatMessage({
             id: 'pages.config.untitled',
             defaultMessage: 'untitled config',
           }),
@@ -367,7 +367,7 @@ const TableList: React.FC = () => {
          */
         onSubmit={async (value) => {
           const nextConfig = {
-            config_id: (currentRow as API.ConfigItem).config_id,
+            id: (currentRow as API.ConfigItem).id,
             ...value,
           };
           const success = await handleEdit(nextConfig);
@@ -383,7 +383,7 @@ const TableList: React.FC = () => {
           setEditModalOpen(false);
         }}
         modalOpen={editModalOpen}
-        // form doesn't need config_id
+        // form doesn't need config's id
         values={(currentRow as FormValueType) || {}}
         title={intl.formatMessage({
           id: 'pages.config.editForm.title',
@@ -403,18 +403,15 @@ const TableList: React.FC = () => {
         }}
         closable={false}
       >
-        {currentRow?.config_name && (
+        {currentRow?.name && (
           <ProDescriptions<API.ConfigItem>
             // use single column because some field names are very long
             column={1}
-            title={currentRow?.config_name}
+            title={currentRow?.name}
             // use local `dataSource` instead of remote `request` for responsiveness
             dataSource={currentRow || {}}
             columns={
-              TypeToColumns(
-                currentRow.config_type,
-                columns,
-              ) as ProDescriptionsItemProps<API.ConfigItem>[]
+              TypeToColumns(currentRow.type, columns) as ProDescriptionsItemProps<API.ConfigItem>[]
             }
             actionRef={showDetailsActionRef}
           />
