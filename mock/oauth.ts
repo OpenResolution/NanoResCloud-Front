@@ -24,9 +24,9 @@ export default {
       return;
     }
     res.send({
-      user_name: 'Nano',
-      user_id: '1',
-      user_email: 'user@example.com',
+      name: 'Nano',
+      id: '1',
+      email: 'user@example.com',
     });
   },
   'POST /api/auth/login': async (req: Request, res: Response) => {
