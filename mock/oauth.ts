@@ -11,7 +11,7 @@ const waitTime = (time: number = 100) => {
 const access_token_value = 'AccessTokenValue';
 
 export default {
-  'GET /api/oauth/currentUser': (req: Request, res: Response) => {
+  'GET /api/users/me': (req: Request, res: Response) => {
     if (req.headers.authorization !== `Bearer ${access_token_value}`) {
       res.status(401).send({
         data: {
@@ -24,21 +24,17 @@ export default {
       return;
     }
     res.send({
-      user_name: 'Nano',
-      user_id: '1',
-      user_email: 'user@example.com',
+      name: 'Nano',
+      id: '1',
+      email: 'user@example.com',
     });
   },
-  'POST /api/oauth/login': async (req: Request, res: Response) => {
+  'POST /api/auth/login': async (req: Request, res: Response) => {
     const { email, password } = req.body;
     await waitTime(2000);
     if (password === 'password' && email === 'user@example.com') {
       res.send({
-        status_code: '',
-        msg: '',
-        data: {
-          access_token: access_token_value,
-        },
+        access_token: access_token_value,
       });
       return;
     }
@@ -49,7 +45,7 @@ export default {
       success: false,
     });
   },
-  'POST /api/oauth/logout': (req: Request, res: Response) => {
+  'POST /api/auth/logout': (req: Request, res: Response) => {
     res.send({
       status_code: '200',
       msg: 'logout successful',

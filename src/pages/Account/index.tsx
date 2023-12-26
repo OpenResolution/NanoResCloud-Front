@@ -1,164 +1,188 @@
-import { PageContainer } from '@ant-design/pro-components';
+import type { ProFormInstance } from '@ant-design/pro-components';
+import { PageContainer, ProForm, ProFormText } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
-import { Card, theme } from 'antd';
-import React from 'react';
+import { Button, Form, Input, Layout, List, Menu, Modal, Space, message } from 'antd';
+import { useRef, useState } from 'react';
 
-/**
- * 每个单独的卡片，为了复用样式抽成了组件
- * @param param0
- * @returns
- */
-const InfoCard: React.FC<{
-  title: string;
-  index: number;
-  desc: string;
-  href: string;
-}> = ({ title, href, index, desc }) => {
-  const { useToken } = theme;
+type ActiveTab = 'basic' | 'security';
+type FormFields = {
+  name: string;
+  email: string;
+};
 
-  const { token } = useToken();
+const Basic: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  const { currentUser } = initialState || {};
 
+  const formRef = useRef<ProFormInstance<FormFields>>();
   return (
-    <div
-      style={{
-        backgroundColor: token.colorBgContainer,
-        boxShadow: token.boxShadow,
-        borderRadius: '8px',
-        fontSize: '14px',
-        color: token.colorTextSecondary,
-        lineHeight: '22px',
-        padding: '16px 19px',
-        minWidth: '220px',
-        flex: 1,
+    <ProForm<FormFields>
+      onFinish={async (values) => {
+        // Handle the basic info update logic here
+        console.log(values);
+        const val1 = await formRef.current?.validateFields();
+        console.log('validateFields:', val1);
+        const val2 = await formRef.current?.validateFieldsReturnFormatValue?.();
+        console.log('validateFieldsReturnFormatValue:', val2);
+        message.success('Submitted successfully');
       }}
+      formRef={formRef}
+      formKey="account-form"
+      request={async () => {
+        return {
+          name: currentUser?.name,
+          email: currentUser?.email,
+        };
+      }}
+      autoFocusFirstInput
     >
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            lineHeight: '22px',
-            backgroundSize: '100%',
-            textAlign: 'center',
-            padding: '8px 16px 16px 12px',
-            color: '#FFF',
-            fontWeight: 'bold',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/zos/bmw-prod/daaf8d50-8e6d-4251-905d-676a24ddfa12.svg')",
-          }}
-        >
-          {index}
-        </div>
-        <div
-          style={{
-            fontSize: '16px',
-            color: token.colorText,
-            paddingBottom: 8,
-          }}
-        >
-          {title}
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: '14px',
-          color: token.colorTextSecondary,
-          textAlign: 'justify',
-          lineHeight: '22px',
-          marginBottom: 8,
-        }}
-      >
-        {desc}
-      </div>
-      <a href={href} target="_blank" rel="noreferrer">
-        了解更多 {'>'}
-      </a>
-    </div>
+      <ProFormText
+        width="md"
+        name="name"
+        label="Username"
+        placeholder="Please enter an user name"
+      />
+      <ProFormText
+        width="md"
+        name="email"
+        fieldProps={{ disabled: true }}
+        label="Email"
+        placeholder="Please enter an email address"
+      />
+    </ProForm>
   );
 };
 
-const Welcome: React.FC = () => {
-  const { token } = theme.useToken();
-  const { initialState } = useModel('@@initialState');
+const Security: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleOk = (values: { password: string; confirmPassword: string }) => {
+    // Handle the password update logic here
+    console.log(values);
+    message.success('Submitted successfully');
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <Layout>
+      <List
+        itemLayout="horizontal"
+        style={{ marginTop: '-12px' }}
+        dataSource={[
+          {
+            title: 'Account Password',
+            action: showModal,
+          },
+        ]}
+        renderItem={(item) => (
+          <List.Item
+            actions={[
+              <Button key="change-password" type="link" onClick={item.action}>
+                Change
+              </Button>,
+            ]}
+          >
+            <List.Item.Meta title={item.title} />
+          </List.Item>
+        )}
+      />
+      <Modal
+        title="Change Password"
+        open={isModalOpen}
+        onCancel={handleCancel}
+        footer={null}
+        destroyOnClose
+      >
+        <Form name="updatePassword" initialValues={{ remember: true }} onFinish={handleOk}>
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: 'Please input your new password' }]}
+            style={{ paddingTop: '12px' }}
+          >
+            <Input.Password placeholder="New password" />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            dependencies={['password']}
+            hasFeedback
+            rules={[
+              { required: true, message: 'Please confirm your password' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Two passwords do not match'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="Confirm new password" />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+              <Button htmlType="reset">Reset</Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </Layout>
+  );
+};
+
+const Account: React.FC = () => {
+  const { Header, Content, Sider } = Layout;
+  const [activeTab, setActiveTab] = useState<ActiveTab>('basic');
+  const handleMenuClick = (e: { key: React.Key }) => {
+    setActiveTab(e.key as ActiveTab);
+  };
+
   return (
     <PageContainer>
-      <Card
-        style={{
-          borderRadius: 8,
-        }}
-        bodyStyle={{
-          backgroundImage:
-            initialState?.settings?.navTheme === 'realDark'
-              ? 'background-image: linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
-              : 'background-image: linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
-        }}
-      >
-        <div
+      <Layout style={{ minHeight: '100vh', flexDirection: 'row' }}>
+        <Sider
+          width={240}
           style={{
-            backgroundPosition: '100% -30%',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '274px auto',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/mdn/rms_a9745b/afts/img/A*BuFmQqsB2iAAAAAAAAAAAAAAARQnAQ')",
+            paddingTop: '10px',
+            backgroundColor: '#fff',
+            borderRight: '1px solid #e8e8e8',
+            overflow: 'auto',
           }}
+          className="site-layout-background"
         >
-          <div
+          <Menu mode="inline" selectedKeys={[activeTab]} onClick={handleMenuClick}>
+            <Menu.Item key="basic">Basic Settings</Menu.Item>
+            <Menu.Item key="security">Security Settings</Menu.Item>
+          </Menu>
+        </Sider>
+        <Layout style={{ paddingLeft: '50px', backgroundColor: '#fff' }}>
+          <Header style={{ fontSize: 20, padding: 0, backgroundColor: '#fff' }}>
+            {activeTab === 'basic' ? 'Basic Settings' : 'Security Settings'}
+          </Header>
+          <Content
             style={{
-              fontSize: '20px',
-              color: token.colorTextHeading,
+              paddingTop: '12px',
+              paddingRight: '24px',
+              paddingBottom: '24px',
+              overflow: 'auto',
             }}
           >
-            欢迎使用 Ant Design Pro
-          </div>
-          <p
-            style={{
-              fontSize: '14px',
-              color: token.colorTextSecondary,
-              lineHeight: '22px',
-              marginTop: 16,
-              marginBottom: 32,
-              width: '65%',
-            }}
-          >
-            Ant Design Pro 是一个整合了 umi，Ant Design 和 ProComponents
-            的脚手架方案。致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 16,
-            }}
-          >
-            <InfoCard
-              index={1}
-              href="https://umijs.org/docs/introduce/introduce"
-              title="了解 umi"
-              desc="umi 是一个可扩展的企业级前端应用框架,umi 以路由为基础的，同时支持配置式路由和约定式路由，保证路由的功能完备，并以此进行功能扩展。"
-            />
-            <InfoCard
-              index={2}
-              title="了解 ant design"
-              href="https://ant.design"
-              desc="antd 是基于 Ant Design 设计体系的 React UI 组件库，主要用于研发企业级中后台产品。"
-            />
-            <InfoCard
-              index={3}
-              title="了解 Pro Components"
-              href="https://procomponents.ant.design"
-              desc="ProComponents 是一个基于 Ant Design 做了更高抽象的模板组件，以 一个组件就是一个页面为开发理念，为中后台开发带来更好的体验。"
-            />
-          </div>
-        </div>
-      </Card>
+            {activeTab === 'basic' && <Basic />}
+            {activeTab === 'security' && <Security />}
+          </Content>
+        </Layout>
+      </Layout>
     </PageContainer>
   );
 };
 
-export default Welcome;
+export default Account;
